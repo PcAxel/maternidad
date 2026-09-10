@@ -1,0 +1,49 @@
+/* Contenedor tipo tarjeta para el encabezado */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #dfe3df;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 4px 15px rgba(22, 35, 31, 0.04);
+}
+
+.page-header__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.page-header__title {
+  font-family: 'Fraunces', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: #16231f;
+}
+
+.page-intro {
+  color: #5c6b65;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Forzamos al botón primario de Bootstrap a usar tu paleta verde */
+.btn-primary {
+  background-color: #1f4b4c !important;
+  border-color: #1f4b4c !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 1.25rem !important;
+  font-weight: 500 !important;
+  transition: all 200ms ease !important;
+}
+
+.btn-primary:hover {
+  background-color: #16231f !important;
+  border-color: #16231f !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(31, 75, 76, 0.2);
+}

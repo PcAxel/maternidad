@@ -1,15 +1,29 @@
+/* =========================================
+   ENCABEZADO (Modificado tipo tarjeta)
+   ========================================= */
 .dashboard-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center; 
   justify-content: space-between;
   gap: 1.5rem;
-  margin-bottom: 0.75rem;
+  background: #ffffff;
+  border: 1px solid #dfe3df;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 4px 15px rgba(22, 35, 31, 0.04);
+}
+
+.dashboard-header__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .dashboard-header__title {
   font-family: 'Fraunces', serif;
-  font-size: 1.875rem;
-  font-weight: 500;
+  font-size: 2rem;
+  font-weight: 600;
   margin: 0 0 0.5rem;
   color: #16231f;
 }
@@ -17,37 +31,45 @@
 .dashboard-header__badge {
   display: inline-block;
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #1f4b4c;
   background: rgba(31, 75, 76, 0.1);
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 999px;
-}
-
-.dashboard-header__logout {
-  background: none;
-  border: 1px solid #dfe3df;
-  color: #5c6b65;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-family: inherit;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: border-color 150ms ease, color 150ms ease;
-}
-
-.dashboard-header__logout:hover {
-  border-color: #1f4b4c;
-  color: #1f4b4c;
+  margin-bottom: 0.75rem;
 }
 
 .dashboard-intro {
   color: #5c6b65;
-  font-size: 0.9375rem;
-  margin: 0 0 2.5rem;
+  font-size: 0.95rem;
+  margin: 0;
 }
 
+.dashboard-header__logout {
+  background: #ffffff;
+  border: 1px solid #dfe3df;
+  color: #df4759; 
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 200ms ease;
+}
+
+.dashboard-header__logout:hover {
+  background: #df4759;
+  border-color: #df4759;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(223, 71, 89, 0.2);
+}
+
+/* =========================================
+   CUADRÍCULA Y TARJETAS (Intactas)
+   ========================================= */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

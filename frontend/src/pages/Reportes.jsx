@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MainLayout from '../layouts/MainLayout'
 import axios from 'axios'
+import './Reportes.css' // <-- Conectamos los estilos
 
 function Reportes() {
   const [fechaInicio, setFechaInicio] = useState('')
@@ -75,10 +76,16 @@ function Reportes() {
 
   return (
     <MainLayout>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Reportes y Consultas</h1>
-        <div>
-          <button className="btn btn-outline-danger me-2" onClick={exportarPDF}>
+      {/* NUEVO ENCABEZADO ESTILO TARJETA */}
+      <div className="page-header">
+        <div className="page-header__content">
+          <h1 className="page-header__title">Reportes y Consultas</h1>
+          <p className="page-intro">Módulo de análisis estadístico e indicadores clave para gerencia.</p>
+        </div>
+        
+        {/* Botones agrupados a la derecha */}
+        <div className="header-actions">
+          <button className="btn btn-outline-danger" onClick={exportarPDF}>
             📄 Exportar PDF
           </button>
           <button className="btn btn-outline-success" onClick={exportarExcel}>
@@ -86,10 +93,6 @@ function Reportes() {
           </button>
         </div>
       </div>
-
-      <p className="text-muted">
-        Módulo de análisis estadístico e indicadores clave para gerencia.
-      </p>
 
       {error && <div className="alert alert-danger">{error}</div>}
 

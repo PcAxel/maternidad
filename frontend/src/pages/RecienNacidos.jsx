@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import MainLayout from '../layouts/MainLayout'
 import axios from 'axios'
+import './RecienNacidos.css' // <-- Conectamos los estilos
 
 function RecienNacidos() {
   const [partoId, setPartoId] = useState('')
@@ -79,13 +80,13 @@ function RecienNacidos() {
 
   return (
     <MainLayout>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Gestión de Recién Nacidos</h1>
+      {/* NUEVO ENCABEZADO ESTILO TARJETA */}
+      <div className="page-header">
+        <div className="page-header__content">
+          <h1 className="page-header__title">Gestión de Recién Nacidos</h1>
+          <p className="page-intro">Registro clínico inicial, trazabilidad y evaluación de estado de salud.</p>
+        </div>
       </div>
-      
-      <p className="text-muted">
-        Registro clínico inicial, trazabilidad y evaluación de estado de salud.
-      </p>
 
       {/* Alerta dinámica si el APGAR es crítico */}
       {alertaCritica && (

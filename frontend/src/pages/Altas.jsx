@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import MainLayout from '../layouts/MainLayout'
 import axios from 'axios'
+import './Altas.css' // <-- Conectamos los estilos
 
 function Altas() {
   const [altasPendientes, setAltasPendientes] = useState([])
@@ -39,13 +40,15 @@ function Altas() {
 
   return (
     <MainLayout>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Gestión de Altas</h1>
-        {/* Botón para exportar el historial a Excel como pide el backlog */}
+      {/* NUEVO ENCABEZADO ESTILO TARJETA */}
+      <div className="page-header">
+        <div className="page-header__content">
+          <h1 className="page-header__title">Gestión de Altas</h1>
+          <p className="page-intro">Módulo de formalización de egresos médicos y administrativos.</p>
+        </div>
+        {/* Este botón ahora se alineará a la derecha automáticamente y tendrá tu color verde */}
         <button className="btn btn-outline-success">Exportar Historial a Excel</button>
       </div>
-
-      <p className="text-muted">Módulo de formalización de egresos médicos y administrativos.</p>
 
       {mensaje && <div className="alert alert-warning">{mensaje}</div>}
 
@@ -90,4 +93,4 @@ function Altas() {
   )
 }
 
-export default Altas // ¡No olvides exportarlo correctamente!
+export default Altas

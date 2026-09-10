@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MainLayout from '../layouts/MainLayout'
 import axios from 'axios' // Asegúrate de tener axios instalado (npm install axios)
+import './Pacientes.css' // <-- Aquí conectamos los nuevos estilos que crearemos
 
 function Pacientes() {
   // 1. Estados alineados EXACTAMENTE con el models.py de Django
@@ -63,8 +64,13 @@ function Pacientes() {
 
   return (
     <MainLayout>
-      <h1>Gestión de Pacientes</h1>
-      <p className="text-muted">Registro de nueva paciente.</p>
+      {/* NUEVO ENCABEZADO ESTILO TARJETA */}
+      <div className="page-header">
+        <div className="page-header__content">
+          <h1 className="page-header__title">Gestión de Pacientes</h1>
+          <p className="page-intro">Registro de nueva paciente.</p>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="mt-4">
         {/* Usamos un sistema de grillas (row/col) de Bootstrap para que no quede tan largo hacia abajo */}

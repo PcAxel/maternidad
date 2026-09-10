@@ -36,13 +36,16 @@ function Dashboard() {
   return (
     <MainLayout>
       <div className="dashboard-header">
-        <div>
+        <div className="dashboard-header__content">
           <h1 className="dashboard-header__title">Hola, {nombre}</h1>
           {rol && (
             <span className="dashboard-header__badge">
               {roleLabels[rol] || rol}
             </span>
           )}
+          <p className="dashboard-intro">
+            Elige una sección para continuar con tu trabajo del día.
+          </p>
         </div>
         <button className="dashboard-header__logout" onClick={handleLogout}>
           Cerrar sesión

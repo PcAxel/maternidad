@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MainLayout from '../layouts/MainLayout'
 import axios from 'axios'
+import './Partos.css' // <-- Conectamos los estilos
 
 function Partos() {
   // Estados para el formulario basados en los requerimientos del Módulo 2
@@ -61,13 +62,13 @@ function Partos() {
 
   return (
     <MainLayout>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Gestión de Partos</h1>
+      {/* NUEVO ENCABEZADO ESTILO TARJETA */}
+      <div className="page-header">
+        <div className="page-header__content">
+          <h1 className="page-header__title">Gestión de Partos</h1>
+          <p className="page-intro">Registro de procesos de parto, tiempos y posibles complicaciones clínicas.</p>
+        </div>
       </div>
-      
-      <p className="text-muted">
-        Registro de procesos de parto, tiempos y posibles complicaciones clínicas.
-      </p>
 
       <div className="card shadow-sm p-4 mt-4">
         <form onSubmit={handleSubmit}>
