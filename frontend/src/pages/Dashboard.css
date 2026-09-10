@@ -1,0 +1,86 @@
+.dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dashboard-header__title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.875rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem;
+  color: #16231f;
+}
+
+.dashboard-header__badge {
+  display: inline-block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1f4b4c;
+  background: rgba(31, 75, 76, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+}
+
+.dashboard-header__logout {
+  background: none;
+  border: 1px solid #dfe3df;
+  color: #5c6b65;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.dashboard-header__logout:hover {
+  border-color: #1f4b4c;
+  color: #1f4b4c;
+}
+
+.dashboard-intro {
+  color: #5c6b65;
+  font-size: 0.9375rem;
+  margin: 0 0 2.5rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.dashboard-card {
+  display: block;
+  background: #fff;
+  border: 1px solid #dfe3df;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.dashboard-card:hover {
+  border-color: #1f4b4c;
+  transform: translateY(-2px);
+}
+
+.dashboard-card h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: #16231f;
+}
+
+.dashboard-card p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #5c6b65;
+  margin: 0;
+}
