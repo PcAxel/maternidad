@@ -1,6 +1,16 @@
-import os
 from pathlib import Path
-from datetime import timedelta
+import os
+import dj_database_url
+from dotenv import load_dotenv
+import pymysql
+from datetime import timedelta  # <-- ¡Agregamos la herramienta que faltaba!
+
+# Activamos el traductor de MySQL
+pymysql.install_as_MySQLdb()
+
+# Rutas y carga del .env
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -64,17 +74,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'sistema_materno.wsgi.application'
 
 # Database
+# Database conectada de forma segura vía variables de entorno
+# Database configurada de forma limpia y directa leyendo el .env
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sistema_materno',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'NAME': os.getenv('DB_NAME', 'defaultdb'),
+        'USER': os.getenv('DB_USER', 'avnadmin'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),  # <-- Sin texto plano al lado
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', '13191'),
+        'OPTIONS': {
+            'ssl': {'ca': None},
+        }
     }
 }
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
