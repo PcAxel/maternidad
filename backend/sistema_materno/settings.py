@@ -74,19 +74,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'sistema_materno.wsgi.application'
 
 # Database
-# Database conectada de forma segura vía variables de entorno
-# Database configurada de forma limpia y directa leyendo el .env
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'defaultdb'),
-        'USER': os.getenv('DB_USER', 'avnadmin'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),  # <-- Sin texto plano al lado
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '13191'),
-        'OPTIONS': {
-            'ssl': {'ca': None},
-        }
+        'PORT': os.getenv('DB_PORT', '3306'),
     }
 }
 # Password validation
