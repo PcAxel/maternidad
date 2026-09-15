@@ -1,26 +1,20 @@
 from pathlib import Path
 import os
-import dj_database_url
 from dotenv import load_dotenv
 import pymysql
-from datetime import timedelta  # <-- ¡Agregamos la herramienta que faltaba!
+from datetime import timedelta
 
-# Activamos el traductor de MySQL
 pymysql.install_as_MySQLdb()
 
-# Rutas y carga del .env
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-SECRET_KEY = 'django-insecure-tu-clave-secreta-aqui'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-DEBUG = True
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-ALLOWED_HOSTS = ['*']
-
-# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -30,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Apps externas
     'rest_framework',
+    'corsheaders',
     'rest_framework_simplejwt',
     # Apps del proyecto
     'app.pacientes',
@@ -42,15 +37,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    # ... otros middlewares ...
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'sistema_materno.urls'
@@ -73,7 +67,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sistema_materno.wsgi.application'
 
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -82,9 +75,11 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT', '3306'),
+        # Si RDS exige SSL, descomenta esto:
+        # 'OPTIONS': {'ssl': {'ca': '/ruta/al/certificado.pem'}},
     }
 }
-# Password validation
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -98,18 +93,23 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Al final del archivo settings.py, autoriza a tu frontend de Vite:
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
 
-# REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
