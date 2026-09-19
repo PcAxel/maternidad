@@ -1,15 +1,22 @@
 // src/services/api.js
 import axios from 'axios';
 
-// Creamos una instancia configurada con la variable de entorno
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL, 
+    baseURL: import.meta.env.VITE_API_URL,
     headers: {
         'Content-Type': 'application/json',
     }
 });
 
-// Ejemplo: Servicio para obtener pacientes
+// Agrega automáticamente el token JWT a cada petición, si existe.
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 export const getPacientes = async () => {
     try {
         const response = await api.get('/pacientes/');

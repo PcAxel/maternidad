@@ -1,0 +1,32 @@
+:root {
+  /* Fondo base perla */
+  --color-bg: #fcf9f9;
+  
+  /* Tarjetas de cristal puro (Blanco al 85% para el efecto vidrio) */
+  --color-surface: rgba(255, 255, 255, 0.85);
+  
+  /* Textos: Carbón cálido (mucho más elegante que el negro puro) */
+  --color-ink: #3a2e2b;
+  --color-muted: #8c7a77;
+  
+  /* Paleta Principal: Rosa Viejo / Mauve (Inspirado en tu imagen) */
+  --color-primary: #c5838e; 
+  --color-primary-dark: #a3656f;
+  
+  /* Acentos: Dorado Champagne elegante */
+  --color-accent: #d4af37;
+  
+  /* Bordes: Un rosa dorado muy sutil y translúcido */
+  --color-line: rgba(197, 131, 142, 0.25);
+
+  /* Tipografías modernas y limpias */
+  --font-display: 'Inter', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+
+  /* Bordes más redondeados para dar suavidad y calidez */
+  --radius: 20px;
+  --radius-sm: 10px;
+  
+  /* Sombras cálidas (Tono rosa difuminado) */
+  --shadow-premium: 0 12px 40px rgba(197, 131, 142, 0.12);
+}

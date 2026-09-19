@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
+from django.db.models import Q
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -9,13 +10,22 @@ from reportlab.lib.units import inch
 from io import BytesIO
 import uuid
 from .models import Alta, HistorialAlta
-from .serializers import AltaSerializer, HistorialAltaSerializer
+from .serializers import AltaSerializer, HistorialAltaSerializer, AltaPendienteSerializer
 from app.recien_nacidos.models import RecienNacido
 from app.pacientes.models import Paciente
 
 class AltaViewSet(viewsets.ModelViewSet):
     queryset = Alta.objects.all()
     serializer_class = AltaSerializer
+
+    @action(detail=False, methods=['get'])
+    def pendientes(self, request):
+        altas = Alta.objects.filter(
+            Q(alta_clinica_confirmada=False) | Q(alta_administrativa_confirmada=False)
+        ).select_related('paciente', 'recien_nacido')
+        serializer = AltaPendienteSerializer(altas, many=True)
+        return Response(serializer.data)
+
     
     @action(detail=False, methods=['post'])
     def verificar_registros(self, request):

@@ -1,62 +1,79 @@
 import { useState } from 'react'
 import MainLayout from '../layouts/MainLayout'
-import axios from 'axios'
-import './Reportes.css' // <-- Conectamos los estilos
+import api from '../services/api'
+import { 
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
+  PieChart, Pie, Cell, Legend 
+} from 'recharts'
+import './Reportes.css'
 
 function Reportes() {
   const [fechaInicio, setFechaInicio] = useState('')
-  const [fechaFin, setFechaFin] = useState('') // Ajustado para coincidir con el backend
+  const [fechaFin, setFechaFin] = useState('')
   const [loading, setLoading] = useState(false)
+  const [cargandoExcel, setCargandoExcel] = useState(false)
   const [error, setError] = useState('')
 
-  // Estado inicializado en cero
   const [indicadores, setIndicadores] = useState({
-    tasaCesareas: '0%',
+    tasaCesareas: 0,
     rnBajoPeso: 0,
-    promedioHospitalizacion: '0 días',
+    promedioHospitalizacion: 0,
     totalPartos: 0
   })
+
+  // Datos estructurados para alimentar los gráficos visuales de Recharts
+  const [datosGrafico, setDatosGrafico] = useState([])
+  const [datosPastel, setDatosPastel] = useState([])
 
   const consultarReporte = async (e) => {
     e.preventDefault()
     
     if (!fechaInicio || !fechaFin) {
-      setError('Debes seleccionar las fechas de inicio y fin.')
+      setError('Debes seleccionar las fechas de inicio y fin para generar el reporte.')
+      return
+    }
+
+    if (fechaInicio > fechaFin) {
+      setError('La fecha de inicio no puede ser posterior a la fecha fin.')
       return
     }
 
     setError('')
     setLoading(true)
 
-    // Rescatamos el token de seguridad guardado en el Login
-    const token = localStorage.getItem('access_token') // Cambia el nombre si tu token se llama distinto
-    
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}` // Formato estándar de Django REST Framework
-      },
-      params: {
-        fecha_inicio: fechaInicio,
-        fecha_fin: fechaFin
-      }
-    }
+    const params = { fecha_inicio: fechaInicio, fecha_fin: fechaFin }
 
     try {
-      // Promise.all permite hacer las 3 peticiones al backend AL MISMO TIEMPO, 
-      // haciendo que el sistema sea muchísimo más rápido.
       const [resCesareas, resBajoPeso, resDias] = await Promise.all([
-        axios.get('http://localhost:8000/api/reportes/cesareas/', config),
-        axios.get('http://localhost:8000/api/reportes/bajo-peso/', config),
-        axios.get('http://localhost:8000/api/reportes/dias-hospitalizacion/', config)
+        api.get('/reportes/cesareas/', { params }),
+        api.get('/reportes/bajo-peso/', { params }),
+        api.get('/reportes/dias-hospitalizacion/', { params })
       ])
 
-      // Asignamos las respuestas exactas que programó tu compañero
+      const cesareasNum = Number(resCesareas.data.tasa_cesareas ?? 0)
+      const partosNum = Number(resCesareas.data.total_partos ?? 0)
+      const bajoPesoNum = Number(resBajoPeso.data.bajo_peso ?? 0)
+      const promedioDiasNum = Number(resDias.data.promedio_dias ?? 0)
+
       setIndicadores({
-        tasaCesareas: `${resCesareas.data.tasa_cesareas}%`,
-        totalPartos: resCesareas.data.total_partos,
-        rnBajoPeso: resBajoPeso.data.bajo_peso,
-        promedioHospitalizacion: `${resDias.data.promedio_dias} días`
+        tasaCesareas: cesareasNum,
+        totalPartos: partosNum,
+        rnBajoPeso: bajoPesoNum,
+        promedioHospitalizacion: promedioDiasNum
       })
+
+      // Alimentamos el gráfico de barras comparativo
+      setDatosGrafico([
+        { name: 'Total Partos', valor: partosNum },
+        { name: 'Bajo Peso', valor: bajoPesoNum },
+        { name: 'Días Estada (Prom)', valor: promedioDiasNum }
+      ])
+
+      // Alimentamos el gráfico circular de proporción
+      setDatosPastel([
+        { name: 'Cesáreas (%)', value: cesareasNum },
+        { name: 'Partos Vaginales / Otros (%)', value: Math.max(0, 100 - cesareasNum) }
+      ])
 
     } catch (err) {
       console.error("Error al cargar los reportes:", err)
@@ -66,89 +83,151 @@ function Reportes() {
     }
   }
 
-  const exportarPDF = () => {
-    alert("Función de PDF pendiente de conectar al backend.")
-  }
+  // Función para generar y descargar el Excel con validación de fechas
+  const handleGenerarExcel = async () => {
+    if (!fechaInicio || !fechaFin) {
+      alert("⚠️ Error: Debe ingresar la fecha de inicio y la fecha de término para generar el reporte en Excel.");
+      return;
+    }
 
-  const exportarExcel = () => {
-    alert("Función de Excel pendiente de conectar al backend.")
-  }
+    try {
+      setCargandoExcel(true);
+      
+      const response = await api.get('/reportes/excel/', {
+        params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin },
+        responseType: 'blob',
+      });
+
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Reporte_Maternidad_${fechaInicio}_al_${fechaFin}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setCargandoExcel(false);
+    } catch (error) {
+      console.error("Error al generar el excel:", error);
+      alert("❌ Ocurrió un error al generar el reporte en Excel.");
+      setCargandoExcel(false);
+    }
+  };
+
+  // Colores profesionales para los gráficos circulares
+  const COLORS = ['#1f4b4c', '#df4759', '#f39c12', '#3498db'];
 
   return (
     <MainLayout>
-      {/* NUEVO ENCABEZADO ESTILO TARJETA */}
       <div className="page-header">
         <div className="page-header__content">
-          <h1 className="page-header__title">Reportes y Consultas</h1>
-          <p className="page-intro">Módulo de análisis estadístico e indicadores clave para gerencia.</p>
+          <h1 className="page-header__title">Infografía y Gráficos Estadísticos</h1>
+          <p className="page-intro">Panel analítico visual con representación gráfica de indicadores clínicos.</p>
         </div>
         
-        {/* Botones agrupados a la derecha */}
         <div className="header-actions">
-          <button className="btn btn-outline-danger" onClick={exportarPDF}>
-            📄 Exportar PDF
-          </button>
-          <button className="btn btn-outline-success" onClick={exportarExcel}>
-            📊 Exportar Excel
+          <button className="btn btn-outline-danger" onClick={() => alert("Exportando PDF...")}>📄 Exportar PDF</button>
+          <button 
+            className="btn btn-outline-success" 
+            onClick={handleGenerarExcel}
+            disabled={cargandoExcel}
+          >
+            {cargandoExcel ? 'Generando Excel...' : '📊 Exportar Excel'}
           </button>
         </div>
       </div>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+      {error && <div className="alert alert-danger mb-4">{error}</div>}
 
-      {/* Sección de Filtros */}
-      <div className="card shadow-sm p-3 mb-4">
-        <form onSubmit={consultarReporte} className="row align-items-end">
+      {/* Filtros de Fecha */}
+      <div className="card shadow-sm p-4 mb-4">
+        <form onSubmit={consultarReporte} className="row align-items-end g-3">
           <div className="col-md-4">
             <label className="form-label fw-bold">Fecha Inicio</label>
-            <input 
-              type="date" 
-              className="form-control" 
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-            />
+            <input type="date" className="form-control" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} required />
           </div>
           <div className="col-md-4">
             <label className="form-label fw-bold">Fecha Fin</label>
-            <input 
-              type="date" 
-              className="form-control" 
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-            />
+            <input type="date" className="form-control" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} required />
           </div>
           <div className="col-md-4">
-            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-              {loading ? 'Consultando...' : 'Generar Reporte'}
+            <button type="submit" className="btn btn-primary w-100 py-2" disabled={loading}>
+              {loading ? 'Generando gráficos...' : 'Generar Reporte Visual'}
             </button>
           </div>
         </form>
       </div>
 
-      {/* Tarjetas de Indicadores */}
-      <div className="row mb-4">
-        <div className="col-md-3">
-          <div className="card bg-light shadow-sm text-center p-3 h-100">
-            <h6 className="text-muted">Total Partos</h6>
-            <h3 className="fw-bold text-dark">{indicadores.totalPartos}</h3>
+      {/* SECCIÓN DE GRÁFICOS VISUALES */}
+      <div className="row g-4 mb-4">
+        
+        {/* Gráfico 1: Gráfico de Barras Estadísticas */}
+        <div className="col-md-7">
+          <div className="card shadow-sm p-4 border-0 h-100 bg-white">
+            <h5 className="text-secondary fw-bold mb-3">Resumen Comparativo de Indicadores</h5>
+            <div style={{ width: '100%', height: '300px' }}>
+              <ResponsiveContainer>
+                <BarChart data={datosGrafico}>
+                  <XAxis dataKey="name" stroke="#666" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="valor" fill="#1f4b4c" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
-        <div className="col-md-3">
-          <div className="card bg-light shadow-sm text-center p-3 h-100">
-            <h6 className="text-muted">Tasa de Cesáreas</h6>
-            <h3 className="fw-bold text-primary">{indicadores.tasaCesareas}</h3>
+
+        {/* Gráfico 2: Gráfico Circular / Pastel */}
+        <div className="col-md-5">
+          <div className="card shadow-sm p-4 border-0 h-100 bg-white text-center">
+            <h5 className="text-secondary fw-bold mb-3">Distribución Porcentual (Cesáreas)</h5>
+            <div style={{ width: '100%', height: '260px' }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={datosPastel}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label
+                  >
+                    {datosPastel.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
-        <div className="col-md-3">
-          <div className="card bg-light shadow-sm text-center p-3 h-100">
-            <h6 className="text-muted">RN con Bajo Peso ({'<'} 2.5kg)</h6>
-            <h3 className="fw-bold text-warning">{indicadores.rnBajoPeso}</h3>
+
+      </div>
+
+      {/* Tarjetas inferiores de apoyo numérico */}
+      <div className="row g-3">
+        <div className="col-md-4">
+          <div className="card p-3 border-0 shadow-sm text-center bg-light">
+            <span className="text-muted">Total Partos Analizados</span>
+            <h3 className="fw-bold text-dark mt-1">{indicadores.totalPartos}</h3>
           </div>
         </div>
-        <div className="col-md-3">
-          <div className="card bg-light shadow-sm text-center p-3 h-100">
-            <h6 className="text-muted">Promedio Hospitalización</h6>
-            <h3 className="fw-bold text-info">{indicadores.promedioHospitalizacion}</h3>
+        <div className="col-md-4">
+          <div className="card p-3 border-0 shadow-sm text-center bg-light">
+            <span className="text-muted">Neonatos con Bajo Peso</span>
+            <h3 className="fw-bold text-warning mt-1">{indicadores.rnBajoPeso}</h3>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="card p-3 border-0 shadow-sm text-center bg-light">
+            <span className="text-muted">Promedio de Estadía</span>
+            <h3 className="fw-bold text-info mt-1">{indicadores.promedioHospitalizacion} días</h3>
           </div>
         </div>
       </div>

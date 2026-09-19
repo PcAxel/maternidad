@@ -11,7 +11,18 @@ class PacienteViewSet(viewsets.ModelViewSet):
     queryset = Paciente.objects.filter(activo=True)
     serializer_class = PacienteSerializer
     permission_classes = [IsAuthenticated]
-    
+
+    def get_permissions(self):
+        # El administrativo ingresa/edita los datos básicos del paciente.
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdministrativo()]
+        # La matrona (o médico) es quien completa los antecedentes clínicos.
+        if self.action == 'antecedentes':
+            return [IsAuthenticated(), IsMatrona()]
+        # Consultar la ficha (listar, ver detalle, historial) queda abierto
+        # a cualquier usuario autenticado del equipo clínico-administrativo.
+        return [IsAuthenticated()]
+
     def get_queryset(self):
         queryset = super().get_queryset()
         busqueda = self.request.query_params.get('busqueda', '')

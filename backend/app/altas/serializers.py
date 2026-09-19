@@ -18,3 +18,21 @@ class AltaSerializer(serializers.ModelSerializer):
             'alta_administrativa_confirmada', 'fecha_alta_administrativa', 'administrativo_responsable',
             'certificado_generado', 'certificado_pdf', 'fecha_certificado',
         ]
+
+
+class AltaPendienteSerializer(serializers.ModelSerializer):
+    paciente_nombre = serializers.SerializerMethodField()
+    recien_nacido_numero = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Alta
+        fields = [
+            'id', 'paciente_nombre', 'recien_nacido_numero',
+            'alta_clinica_confirmada', 'alta_administrativa_confirmada',
+        ]
+
+    def get_paciente_nombre(self, obj):
+        return f"{obj.paciente.nombre} {obj.paciente.apellido}"
+
+    def get_recien_nacido_numero(self, obj):
+        return obj.recien_nacido.numero_interno if obj.recien_nacido else None
