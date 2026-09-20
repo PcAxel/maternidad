@@ -38,6 +38,13 @@ function MainLayout({ children }) {
     );
   }
 
+  // Eliminamos enlaces duplicados automáticamente
+  links = links.filter((value, index, self) =>
+    index === self.findIndex((t) => (
+      t.to === value.to
+    ))
+  );
+
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = '/';
