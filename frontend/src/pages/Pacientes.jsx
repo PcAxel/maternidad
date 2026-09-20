@@ -1,10 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import MainLayout from '../layouts/MainLayout'
-import axios from 'axios' // Asegúrate de tener axios instalado (npm install axios)
-import './Pacientes.css' // <-- Aquí conectamos los nuevos estilos que crearemos
+import api from '../services/api'
+import './Pacientes.css'
 
 function Pacientes() {
-  // 1. Estados alineados EXACTAMENTE con el models.py de Django
+  const [pacientes, setPacientes] = useState([])
+  const [busqueda, setBusqueda] = useState('')
+  const [cargando, setCargando] = useState(true)
+  const [mensaje, setMensaje] = useState({ texto: '', tipo: '' })
+
+  const [mostrarForm, setMostrarForm] = useState(false)
   const [rut, setRut] = useState('')
   const [nombre, setNombre] = useState('')
   const [apellido, setApellido] = useState('')
@@ -13,119 +18,293 @@ function Pacientes() {
   const [direccion, setDireccion] = useState('')
   const [telefono, setTelefono] = useState('')
   const [email, setEmail] = useState('')
-  const [mensaje, setMensaje] = useState({ texto: '', tipo: '' })
+
+  const [pacienteAntecedentes, setPacienteAntecedentes] = useState(null)
+  const [numeroControles, setNumeroControles] = useState(0)
+  const [numeroPartos, setNumeroPartos] = useState(0)
+  const [numeroCesareas, setNumeroCesareas] = useState(0)
+  const [numeroAbortos, setNumeroAbortos] = useState(0)
+  const [tieneHipertension, setTieneHipertension] = useState(false)
+  const [tieneDiabetesGestacional, setTieneDiabetesGestacional] = useState(false)
+  const [tienePreclampsia, setTienePreclampsia] = useState(false)
+  const [otrasPatologias, setOtrasPatologias] = useState('')
+  const [grupoSanguineo, setGrupoSanguineo] = useState('')
+  const [observaciones, setObservaciones] = useState('')
+
+  const cargarPacientes = async (filtro = '') => {
+    setCargando(true)
+    try {
+      const respuesta = await api.get('/pacientes/', {
+        params: filtro ? { busqueda: filtro } : {},
+      })
+      setPacientes(respuesta.data.results || respuesta.data)
+    } catch (error) {
+      setMensaje({ texto: 'Error al cargar pacientes.', tipo: 'alert-danger' })
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  useEffect(() => {
+    cargarPacientes()
+  }, [])
+
+  const handleBuscar = (e) => {
+    e.preventDefault()
+    cargarPacientes(busqueda)
+  }
+
+  const limpiarFormulario = () => {
+    setRut(''); setNombre(''); setApellido(''); setFechaNacimiento('')
+    setEdad(''); setDireccion(''); setTelefono(''); setEmail('')
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Validación básica del frontend
     if (!rut || !nombre || !apellido || !fechaNacimiento || !edad || !direccion || !telefono) {
-        setMensaje({ texto: 'Completa todos los campos obligatorios.', tipo: 'alert-danger' })
-        return
+      setMensaje({ texto: 'Completa todos los campos obligatorios.', tipo: 'alert-danger' })
+      return
     }
-
     if (Number(edad) < 12 || Number(edad) > 60) {
-        setMensaje({ texto: 'La edad debe estar entre 12 y 60 años.', tipo: 'alert-warning' })
-        return
+      setMensaje({ texto: 'La edad debe estar entre 12 y 60 años.', tipo: 'alert-warning' })
+      return
     }
 
-    // 2. Armamos el Payload (El paquete de datos que Django espera)
-    const payload = {
-        rut: rut,
-        nombre: nombre,
-        apellido: apellido,
-        fecha_nacimiento: fechaNacimiento, // Formato YYYY-MM-DD automático en input type="date"
-        edad: Number(edad),
-        direccion: direccion,
-        telefono: telefono,
-        email: email
-    }
-
-    // 3. Conexión real con tu Backend en Django
     try {
-        // Asumiendo que tu backend corre en localhost:8000
-        const respuesta = await axios.post('http://localhost:8000/api/pacientes/', payload);
-        
-        if (respuesta.status === 201) {
-            setMensaje({ texto: 'Paciente registrada exitosamente en la Base de Datos.', tipo: 'alert-success' })
-            // Limpiar formulario
-            setRut(''); setNombre(''); setApellido(''); setFechaNacimiento('');
-            setEdad(''); setDireccion(''); setTelefono(''); setEmail('');
-        }
+      await api.post('/pacientes/', {
+        rut, nombre, apellido,
+        fecha_nacimiento: fechaNacimiento,
+        edad: Number(edad),
+        direccion, telefono, email,
+      })
+      setMensaje({ texto: 'Paciente registrada exitosamente.', tipo: 'alert-success' })
+      limpiarFormulario()
+      setMostrarForm(false)
+      cargarPacientes(busqueda)
     } catch (error) {
-        console.error("Error del servidor:", error.response?.data);
-        // Mostrar el error exacto que devuelva el serializers.py de Django
-        setMensaje({ 
-            texto: 'Error al guardar: ' + JSON.stringify(error.response?.data || error.message), 
-            tipo: 'alert-danger' 
-        })
+      const detalle = error.response?.data
+      setMensaje({
+        texto: detalle
+          ? 'Error al guardar: ' + JSON.stringify(detalle)
+          : 'No tienes permiso para registrar pacientes.',
+        tipo: 'alert-danger',
+      })
+    }
+  }
+
+  const abrirAntecedentes = (paciente) => {
+    setPacienteAntecedentes(paciente)
+    const a = paciente.antecedentes
+    setNumeroControles(a?.numero_controles ?? 0)
+    setNumeroPartos(a?.numero_partos ?? 0)
+    setNumeroCesareas(a?.numero_cesareas ?? 0)
+    setNumeroAbortos(a?.numero_abortos ?? 0)
+    setTieneHipertension(a?.tiene_hipertension ?? false)
+    setTieneDiabetesGestacional(a?.tiene_diabetes_gestacional ?? false)
+    setTienePreclampsia(a?.tiene_preclampsia ?? false)
+    setOtrasPatologias(a?.otras_patologias ?? '')
+    setGrupoSanguineo(a?.grupo_sanguineo ?? '')
+    setObservaciones(a?.observaciones ?? '')
+  }
+
+  const guardarAntecedentes = async (e) => {
+    e.preventDefault()
+    try {
+      await api.post(`/pacientes/${pacienteAntecedentes.id}/antecedentes/`, {
+        numero_controles: Number(numeroControles),
+        numero_partos: Number(numeroPartos),
+        numero_cesareas: Number(numeroCesareas),
+        numero_abortos: Number(numeroAbortos),
+        tiene_hipertension: tieneHipertension,
+        tiene_diabetes_gestacional: tieneDiabetesGestacional,
+        tiene_preclampsia: tienePreclampsia,
+        otras_patologias: otrasPatologias,
+        grupo_sanguineo: grupoSanguineo || null,
+        observaciones: observaciones,
+      })
+      setMensaje({ texto: 'Antecedentes clínicos registrados.', tipo: 'alert-success' })
+      setPacienteAntecedentes(null)
+      cargarPacientes(busqueda)
+    } catch (error) {
+      setMensaje({
+        texto: error.response?.data
+          ? 'Error: ' + JSON.stringify(error.response.data)
+          : 'No tienes permiso para registrar antecedentes clínicos.',
+        tipo: 'alert-danger',
+      })
     }
   }
 
   return (
     <MainLayout>
-      {/* NUEVO ENCABEZADO ESTILO TARJETA */}
       <div className="page-header">
         <div className="page-header__content">
           <h1 className="page-header__title">Gestión de Pacientes</h1>
-          <p className="page-intro">Registro de nueva paciente.</p>
+          <p className="page-intro">Ficha, búsqueda y antecedentes clínicos de cada paciente.</p>
         </div>
+        <button className="btn btn-primary" onClick={() => setMostrarForm(!mostrarForm)}>
+          {mostrarForm ? 'Cancelar' : '+ Nueva paciente'}
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-4">
-        {/* Usamos un sistema de grillas (row/col) de Bootstrap para que no quede tan largo hacia abajo */}
-        <div className="row">
-            <div className="col-md-6 mb-3">
-                <label className="form-label">RUT</label>
-                <input type="text" className="form-control" value={rut} onChange={(e) => setRut(e.target.value)} placeholder="Ej: 12.345.678-9" />
-            </div>
-            
-            <div className="col-md-6 mb-3">
-                <label className="form-label">Fecha de Nacimiento</label>
-                <input type="date" className="form-control" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} />
-            </div>
+      {mensaje.texto && (
+        <div className={`alert ${mensaje.tipo} mt-3`}>{mensaje.texto}</div>
+      )}
 
-            <div className="col-md-6 mb-3">
-                <label className="form-label">Nombre</label>
-                <input type="text" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} />
-            </div>
-
-            <div className="col-md-6 mb-3">
-                <label className="form-label">Apellido</label>
-                <input type="text" className="form-control" value={apellido} onChange={(e) => setApellido(e.target.value)} />
-            </div>
-
-            <div className="col-md-2 mb-3">
-                <label className="form-label">Edad</label>
-                <input type="number" className="form-control" value={edad} onChange={(e) => setEdad(e.target.value)} />
-            </div>
-
-            <div className="col-md-10 mb-3">
-                <label className="form-label">Dirección</label>
-                <input type="text" className="form-control" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
-            </div>
-
-            <div className="col-md-6 mb-3">
-                <label className="form-label">Teléfono</label>
-                <input type="text" className="form-control" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej: +56912345678" />
-            </div>
-
-            <div className="col-md-6 mb-3">
-                <label className="form-label">Email (Opcional)</label>
-                <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-        </div>
-
-        {mensaje.texto && (
-          <div className={`alert ${mensaje.tipo} mt-3`}>
-            {mensaje.texto}
-          </div>
-        )}
-
-        <button type="submit" className="btn btn-primary mt-3">
-          Registrar paciente
-        </button>
+      <form onSubmit={handleBuscar} className="pacientes-buscador">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Buscar por RUT, nombre o apellido…"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
+        <button type="submit" className="btn btn-outline-primary">Buscar</button>
       </form>
+
+      {mostrarForm && (
+        <form onSubmit={handleSubmit} className="mt-3 pacientes-form">
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <label className="form-label">RUT</label>
+              <input type="text" className="form-control" value={rut} onChange={(e) => setRut(e.target.value)} placeholder="Ej: 12.345.678-9" />
+            </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Fecha de Nacimiento</label>
+              <input type="date" className="form-control" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} />
+            </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Nombre</label>
+              <input type="text" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+            </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Apellido</label>
+              <input type="text" className="form-control" value={apellido} onChange={(e) => setApellido(e.target.value)} />
+            </div>
+            <div className="col-md-2 mb-3">
+              <label className="form-label">Edad</label>
+              <input type="number" className="form-control" value={edad} onChange={(e) => setEdad(e.target.value)} />
+            </div>
+            <div className="col-md-10 mb-3">
+              <label className="form-label">Dirección</label>
+              <input type="text" className="form-control" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+            </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Teléfono</label>
+              <input type="text" className="form-control" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej: +56912345678" />
+            </div>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Email (Opcional)</label>
+              <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+          </div>
+          <button type="submit" className="btn btn-primary">Registrar paciente</button>
+        </form>
+      )}
+
+      <div className="table-responsive mt-4">
+        <table className="table table-striped table-hover">
+          <thead className="table-dark">
+            <tr>
+              <th>RUT</th>
+              <th>Nombre</th>
+              <th>Edad</th>
+              <th>Teléfono</th>
+              <th>Antecedentes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cargando && <tr><td colSpan="5">Cargando...</td></tr>}
+            {!cargando && pacientes.length === 0 && (
+              <tr><td colSpan="5">No se encontraron pacientes.</td></tr>
+            )}
+            {pacientes.map((p) => (
+              <tr key={p.id}>
+                <td>{p.rut}</td>
+                <td>{p.nombre} {p.apellido}</td>
+                <td>{p.edad}</td>
+                <td>{p.telefono}</td>
+                <td>
+                  <button className="btn btn-sm btn-outline-secondary" onClick={() => abrirAntecedentes(p)}>
+                    {p.antecedentes ? 'Ver / editar' : 'Agregar'}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {pacienteAntecedentes && (
+        <div className="pacientes-modal">
+          <div className="pacientes-modal__card">
+            <h3>Antecedentes clínicos — {pacienteAntecedentes.nombre} {pacienteAntecedentes.apellido}</h3>
+            <form onSubmit={guardarAntecedentes}>
+              <div className="row">
+                <div className="col-md-3 mb-3">
+                  <label className="form-label">N° controles prenatales</label>
+                  <input type="number" min="0" className="form-control" value={numeroControles} onChange={(e) => setNumeroControles(e.target.value)} />
+                </div>
+                <div className="col-md-3 mb-3">
+                  <label className="form-label">N° partos previos</label>
+                  <input type="number" min="0" className="form-control" value={numeroPartos} onChange={(e) => setNumeroPartos(e.target.value)} />
+                </div>
+                <div className="col-md-3 mb-3">
+                  <label className="form-label">N° cesáreas previas</label>
+                  <input type="number" min="0" className="form-control" value={numeroCesareas} onChange={(e) => setNumeroCesareas(e.target.value)} />
+                </div>
+                <div className="col-md-3 mb-3">
+                  <label className="form-label">N° abortos previos</label>
+                  <input type="number" min="0" className="form-control" value={numeroAbortos} onChange={(e) => setNumeroAbortos(e.target.value)} />
+                </div>
+              </div>
+
+              <div className="mb-3 pacientes-modal__checks">
+                <label className="form-check-label">
+                  <input type="checkbox" className="form-check-input" checked={tieneHipertension} onChange={(e) => setTieneHipertension(e.target.checked)} />
+                  {' '}Hipertensión
+                </label>
+                <label className="form-check-label">
+                  <input type="checkbox" className="form-check-input" checked={tieneDiabetesGestacional} onChange={(e) => setTieneDiabetesGestacional(e.target.checked)} />
+                  {' '}Diabetes gestacional
+                </label>
+                <label className="form-check-label">
+                  <input type="checkbox" className="form-check-input" checked={tienePreclampsia} onChange={(e) => setTienePreclampsia(e.target.checked)} />
+                  {' '}Preeclampsia
+                </label>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Otras patologías</label>
+                <textarea className="form-control" rows="2" value={otrasPatologias} onChange={(e) => setOtrasPatologias(e.target.value)} />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Grupo sanguíneo</label>
+                <select className="form-select" value={grupoSanguineo} onChange={(e) => setGrupoSanguineo(e.target.value)}>
+                  <option value="">Sin especificar</option>
+                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Observaciones</label>
+                <textarea className="form-control" rows="2" value={observaciones} onChange={(e) => setObservaciones(e.target.value)} />
+              </div>
+
+              <div className="pacientes-modal__actions">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setPacienteAntecedentes(null)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </MainLayout>
   )
 }

@@ -10,8 +10,11 @@ import './Reportes.css'
 function Reportes() {
   const [fechaInicio, setFechaInicio] = useState('')
   const [fechaFin, setFechaFin] = useState('')
+  const [tipoParto, setTipoParto] = useState('')
+  const [patologia, setPatologia] = useState('')
   const [loading, setLoading] = useState(false)
   const [cargandoExcel, setCargandoExcel] = useState(false)
+  const [cargandoPdf, setCargandoPdf] = useState(false)
   const [error, setError] = useState('')
 
   const [indicadores, setIndicadores] = useState({
@@ -41,7 +44,12 @@ function Reportes() {
     setError('')
     setLoading(true)
 
-    const params = { fecha_inicio: fechaInicio, fecha_fin: fechaFin }
+    const params = {
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+      ...(tipoParto && { tipo_parto: tipoParto }),
+      ...(patologia && { patologia: patologia }),
+    }
 
     try {
       const [resCesareas, resBajoPeso, resDias] = await Promise.all([
@@ -94,7 +102,12 @@ function Reportes() {
       setCargandoExcel(true);
       
       const response = await api.get('/reportes/excel/', {
-        params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin },
+        params: {
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          ...(tipoParto && { tipo_parto: tipoParto }),
+          ...(patologia && { patologia: patologia }),
+        },
         responseType: 'blob',
       });
 
@@ -116,6 +129,38 @@ function Reportes() {
     }
   };
 
+  const handleGenerarPDF = async () => {
+    if (!fechaInicio || !fechaFin) {
+      alert("⚠️ Error: Debe ingresar la fecha de inicio y la fecha de término para generar el PDF.");
+      return;
+    }
+    try {
+      setCargandoPdf(true);
+      const response = await api.get('/reportes/pdf/', {
+        params: {
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          ...(tipoParto && { tipo_parto: tipoParto }),
+          ...(patologia && { patologia: patologia }),
+        },
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Reporte_Maternidad_${fechaInicio}_al_${fechaFin}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setCargandoPdf(false);
+    } catch (error) {
+      console.error("Error al generar el PDF:", error);
+      alert("❌ Ocurrió un error al generar el reporte en PDF.");
+      setCargandoPdf(false);
+    }
+  };
+
   // Colores profesionales para los gráficos circulares
   const COLORS = ['#1f4b4c', '#df4759', '#f39c12', '#3498db'];
 
@@ -128,7 +173,9 @@ function Reportes() {
         </div>
         
         <div className="header-actions">
-          <button className="btn btn-outline-danger" onClick={() => alert("Exportando PDF...")}>📄 Exportar PDF</button>
+          <button className="btn btn-outline-danger" onClick={handleGenerarPDF} disabled={cargandoPdf}>
+            {cargandoPdf ? 'Generando PDF...' : '📄 Exportar PDF'}
+          </button>
           <button 
             className="btn btn-outline-success" 
             onClick={handleGenerarExcel}
@@ -151,6 +198,24 @@ function Reportes() {
           <div className="col-md-4">
             <label className="form-label fw-bold">Fecha Fin</label>
             <input type="date" className="form-control" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} required />
+          </div>
+          <div className="col-md-2">
+            <label className="form-label fw-bold">Tipo de parto</label>
+            <select className="form-select" value={tipoParto} onChange={(e) => setTipoParto(e.target.value)}>
+              <option value="">Todos</option>
+              <option value="NATURAL">Natural</option>
+              <option value="CESAREA">Cesárea</option>
+              <option value="INSTRUMENTAL">Instrumental</option>
+            </select>
+          </div>
+          <div className="col-md-2">
+            <label className="form-label fw-bold">Patología</label>
+            <select className="form-select" value={patologia} onChange={(e) => setPatologia(e.target.value)}>
+              <option value="">Todas</option>
+              <option value="hipertension">Hipertensión</option>
+              <option value="diabetes_gestacional">Diabetes gestacional</option>
+              <option value="preclampsia">Preeclampsia</option>
+            </select>
           </div>
           <div className="col-md-4">
             <button type="submit" className="btn btn-primary w-100 py-2" disabled={loading}>
