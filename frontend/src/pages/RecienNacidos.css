@@ -47,3 +47,8 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(31, 75, 76, 0.2);
 }
+.rn-acciones {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}

@@ -16,7 +16,11 @@ class RecienNacidoViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Generar número interno único
         numero_interno = f"RN-{timezone.now().year}-{uuid.uuid4().hex[:6].upper()}"
-        instance = serializer.save(numero_interno=numero_interno)
+        parto = serializer.validated_data['parto']
+        instance = serializer.save(
+            numero_interno=numero_interno,
+            paciente_madre=parto.paciente,
+        )
         
         # Generar código QR
         qr_data = f"RN:{instance.numero_interno}|Madre:{instance.paciente_madre.rut}"

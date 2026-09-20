@@ -10,7 +10,7 @@ function MainLayout({ children }) {
   ];
 
   // 2. Filtramos y agregamos secciones según las atribuciones de cada rol
-  if (rol === 'MATRONA' || rol === 'MEDICO' || rol === 'ENFERMERO') {
+  if (rol === 'MATRONA' || rol === 'MEDICO' || rol === 'ENFERMERO' || rol === 'ADMIN_SISTEMA') {
     links.push(
       { to: '/pacientes', label: 'Pacientes' },
       { to: '/partos', label: 'Partos' },
