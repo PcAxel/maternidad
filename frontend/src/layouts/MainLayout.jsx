@@ -12,10 +12,11 @@ const roleLabels = {
 }
 
 function MainLayout({ children }) {
+  // Obtenemos los valores y evitamos que caigan en null o undefined
   const rol = localStorage.getItem('user_role') || 'ADMIN_SISTEMA';
-  const nombre = localStorage.getItem('user_nombre') || 'administrador_jefe';
+  const nombre = localStorage.getItem('user_nombre') || 'Administrador';
 
-  // 1. Definimos los enlaces base que comparten la mayoría o todos
+  // 1. Definimos los enlaces base
   let links = [
     { to: '/dashboard', label: 'Home' },
   ];
@@ -38,12 +39,10 @@ function MainLayout({ children }) {
 
   if (rol === 'JEFATURA' || rol === 'GERENCIA' || rol === 'ADMIN_SISTEMA') {
     links.push(
-      // CORRECCIÓN: Se cambió to: '/informes' por to: '/reportes'
       { to: '/reportes', label: 'Informes' }
     );
   }
 
-  // 3. El Administrador del Sistema tiene acceso exclusivo a la gestión de personal
   if (rol === 'ADMIN_SISTEMA') {
     links.push(
       { to: '/admin/usuarios', label: 'Gestionar Personal' }
@@ -62,9 +61,12 @@ function MainLayout({ children }) {
     window.location.href = '/';
   }
 
+  // Obtenemos la etiqueta de rol de forma segura
+  const displayRole = roleLabels[rol] || rol || 'Usuario del Sistema';
+
   return (
     <div className="layout-modern">
-      {/* Navbar Superior con flexbox para alinear a los extremos y sin línea inferior */}
+      {/* Navbar Superior */}
       <nav className="navbar-premium" style={{ borderBottom: 'none', background: '#fff', padding: '12px 24px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
         <div className="navbar-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
           
@@ -99,12 +101,12 @@ function MainLayout({ children }) {
                 {nombre}
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)' }}>
-                {roleLabels[rol] || rol}
+                {displayRole}
               </div>
             </div>
             
             <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--color-darkcyan, #0F766E)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-              {nombre.charAt(0).toUpperCase()}
+              {nombre ? nombre.charAt(0).toUpperCase() : 'A'}
             </div>
 
             <button 
@@ -119,7 +121,7 @@ function MainLayout({ children }) {
         </div>
       </nav>
 
-      {/* Contenedor central donde va el contenido de cada página */}
+      {/* Contenedor central */}
       <main className="layout-content">
         {children}
       </main>
