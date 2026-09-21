@@ -1,200 +1,268 @@
-@import '../styles/tokens.css';
-
-.dashboard-header {
+.dashboard {
+  width: 100%;
+  position: relative;
+  background-color: var(--color-whitesmoke);
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
+  min-height: 900px;
+  line-height: normal;
+  letter-spacing: normal;
+}
+.navbarContainer {
+  align-self: stretch;
+  height: 64px;
+  background-color: var(--color-white);
+  border-bottom: 1px solid #e2e8f0;
+  box-sizing: border-box;
   justify-content: space-between;
-  margin-bottom: 2.5rem;
-}
-
-.dashboard-header__title {
-  font-family: var(--font-display);
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin: 0 0 0.2rem;
-  color: var(--color-ink);
-  letter-spacing: -1px;
-}
-
-.dashboard-header__badge {
-  display: inline-block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-primary-dark);
-  background: rgba(197, 131, 142, 0.15);
-  border: 1px solid rgba(197, 131, 142, 0.3);
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
-}
-
-.home-layout {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2.5rem;
-  align-items: start;
-}
-
-.section-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--color-primary-dark);
-  margin: 0 0 1.5rem;
-  letter-spacing: -0.5px;
-}
-
-.dashboard-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-/* Modificamos un poco la tarjeta para que encaje mejor en el grid nuevo */
-.dashboard-stat {
-  background: var(--color-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-premium);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  transition: transform 0.3s ease;
-}
-
-.dashboard-stat:hover {
-  transform: translateY(-5px);
-}
-
-.dashboard-stat__value {
-  font-size: 2.8rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  line-height: 1;
-  letter-spacing: -1px;
-}
-
-.dashboard-stat__label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Panel de Alertas Premium */
-.alert-panel {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(212, 175, 55, 0.4); /* Borde dorado */
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: var(--shadow-premium);
-}
-
-.alert-panel__content {
+  padding: 0 32px;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  color: #1e293b;
 }
-
-.alert-panel__icon {
-  font-size: 2rem;
+.brandLogo, .logoIndicator {
+  display: flex;
+  align-items: center;
 }
-
-.alert-panel__title {
-  margin: 0 0 0.2rem;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--color-ink);
+.brandLogo {
+  gap: 8px;
+  font-size: 18px;
 }
-
-.alert-panel__text {
+.logoIndicator {
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  background-color: #0f766e;
+  height: 28px;
+  width: 28px;
+  border-radius: 6px;
+  justify-content: center;
+}
+.m {
+  font-size: 16px;
+  font-weight: 800;
+  color: white;
+}
+.h3 {
   margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-muted);
+  font-weight: 700;
 }
-
-.btn-alert {
-  background: var(--color-accent);
-  color: #fff;
-  text-decoration: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.btn-alert:hover {
-  background: #b59227; /* Dorado más oscuro */
-  transform: translateY(-2px);
-}
-
-/* Menú lateral derecho (Accesos rápidos) */
-.quick-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.action-card {
+.navLinks {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.2rem 1.5rem;
-  background: var(--color-surface);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  color: var(--color-ink);
-  font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-premium);
+  gap: 8px;
+  color: #64748b;
+  margin-left: 40px;
 }
-
-.action-card__icon {
+.navItemDashboard, .navItemPacientes {
+  display: flex;
+  flex-direction: column;
+  padding: 0 8px;
+  justify-content: center;
+}
+.navItemDashboard {
+  color: #0f766e;
+  font-weight: 600;
+}
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.userDetailsDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.drAlejandroSilva {
+  font-weight: 600;
+  font-size: 14px;
+}
+.jefeDeObstetricia {
+  font-size: 11px;
+  color: #64748b;
+}
+.avatarPlaceholder {
+  border: 1px solid #0f766e;
+  background-color: #f0fdfa;
+  height: 36px;
+  width: 36px;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: rgba(197, 131, 142, 0.15);
-  color: var(--color-primary-dark);
-  border-radius: 50%;
-  font-size: 1.2rem;
-  font-weight: 400;
+  color: #0f766e;
+  font-weight: bold;
 }
-
-.action-card:hover {
-  background: var(--color-primary);
-  color: #fff;
-  transform: translateX(5px);
-  border-color: var(--color-primary);
+.mainContent {
+  align-self: stretch;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
-
-.action-card:hover .action-card__icon {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-
-/* Responsividad para pantallas pequeñas */
-@media (max-width: 900px) {
-  .home-layout {
-    grid-template-columns: 1fr;
-  }
-  .alert-panel {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
+.dashboard3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+.centroDeOperaciones {
+  font-size: 14px;
+  color: #64748b;
+}
+.kpiRow {
+  display: flex;
+  gap: 20px;
+}
+.kpiCard {
+  flex: 1;
+  border-radius: 8px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 19px;
+  gap: 8px;
+}
+.kpiValueElement {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #0f766e;
+}
+.frame7 {
+  display: flex;
+  flex-direction: column;
+}
+.pacientesActivos {
+  font-weight: 600;
+  font-size: 14px;
+}
+.hospitalizadosMonitoreo {
+  font-size: 12px;
+  color: #64748b;
+}
+.dashboardSplit {
+  display: flex;
+  gap: 24px;
+}
+.recentActivityPanel {
+  flex: 3;
+  border-radius: 8px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  padding: 22px 23px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.actividadReciente {
+  font-size: 16px;
+}
+.activityTable {
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+.howToConnect {
+  display: flex;
+  background-color: #f8fafc;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 12px;
+  color: #64748b;
+}
+.fecha, .am { width: 120px; }
+.tipo, .ingresoClnico { width: 140px; }
+.paciente, .valenzuelaMarcela { flex: 1; }
+.estado { width: 100px; text-align: right; }
+.platformIcons, .div5 {
+  display: flex;
+  padding: 12px 16px;
+  background-color: white;
+  border-top: 1px solid #e2e8f0;
+  font-size: 13px;
+  align-items: center;
+}
+.ingresoClnico { color: #0f766e; font-weight: 500; }
+.valenzuelaMarcela { font-weight: 600; }
+.frame12 {
+  background-color: #f0fdf4;
+  color: #166534;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.div6 {
+  background-color: #fffbeb;
+  color: #b45309;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.quickAccessPanel {
+  flex: 1;
+  border-radius: 8px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  padding: 22px 23px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.fastActionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.telegram {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #0f766e;
+  font-weight: 600;
+  font-size: 13px;
+}
+.telegram:hover {
+  background-color: #f1f5f9;
+}
+.alertBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  padding: 14px 15px;
+  border-radius: 8px;
+}
+.frame17 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #991b1b;
+  font-weight: 600;
+  font-size: 13px;
+}
+.notificationActionArea {
+  background-color: #0f766e;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
 }

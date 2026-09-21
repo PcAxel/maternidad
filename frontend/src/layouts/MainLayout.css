@@ -1,23 +1,140 @@
-.app-shell {
-  display: flex;
+.layout-modern {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-app);
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Barra superior fija y ordenada */
+.navbar-premium {
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-light);
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  box-sizing: border-box;
   width: 100%;
 }
 
-.app-shell__content {
-  flex: 1;
-  background: #faf9f6;
-  padding: 3rem 3.5rem;
-  color: #16231f;
-  font-family: 'Inter', sans-serif;
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  flex-wrap: wrap; /* Permite flexibilidad si la pantalla es muy justa */
+  gap: 16px;
 }
 
-@media (max-width: 900px) {
-  .app-shell {
+.logo-text {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nav-item {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 20px 0;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.nav-item:hover {
+  color: var(--color-primary);
+}
+
+.nav-item--active {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+  font-weight: 600;
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border-color: #FCA5A5;
+}
+
+.layout-content {
+  padding: 32px;
+  max-width: 1500px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+/* ==========================================
+   ADAPTABILIDAD MÓVIL Y RESPONSIVE (NUEVO)
+   ========================================== */
+@media screen and (max-width: 1024px) {
+  .navbar-premium {
+    padding: 12px 16px;
+    height: auto;
+  }
+  
+  .navbar-container {
     flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
 
-  .app-shell__content {
-    padding: 2rem 1.5rem;
+  .navbar-links {
+    justify-content: center;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .nav-item {
+    padding: 8px 0;
+  }
+
+  .navbar-user {
+    justify-content: space-between;
+    border-top: 1px solid var(--border-light);
+    padding-top: 8px;
+  }
+
+  .layout-content {
+    padding: 16px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .navbar-links {
+    justify-content: flex-start;
   }
 }

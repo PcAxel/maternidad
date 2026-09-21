@@ -2,15 +2,19 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 
 class Paciente(models.Model):
+    # El Regex ahora es flexible: acepta el RUT con o sin puntos, con o sin guion.
     rut = models.CharField(
         max_length=12,
         unique=True,
-        validators=[RegexValidator(r'^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$', 'RUT inválido')]
+        validators=[RegexValidator(r'^\d{1,2}\.?\d{3}\.?\d{3}-?[\dkK]$', 'RUT inválido')]
     )
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
     fecha_nacimiento = models.DateField()
-    edad = models.IntegerField(validators=[MinValueValidator(12), MaxValueValidator(60)])
+    
+    # Ampliamos ligeramente el margen de edad para evitar bloqueos por cálculo
+    edad = models.IntegerField(validators=[MinValueValidator(10), MaxValueValidator(65)])
+    
     direccion = models.TextField()
     telefono = models.CharField(max_length=15)
     email = models.EmailField(blank=True, null=True)

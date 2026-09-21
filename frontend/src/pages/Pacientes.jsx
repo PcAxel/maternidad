@@ -138,10 +138,10 @@ function Pacientes() {
 
   return (
     <MainLayout>
-      <div className="page-header">
-        <div className="page-header__content">
-          <h1 className="page-header__title">Gestión de Pacientes</h1>
-          <p className="page-intro">Ficha, búsqueda y antecedentes clínicos de cada paciente.</p>
+      <div className="page-header flex justify-between items-center mb-4">
+        <div>
+          <h1>Gestión de Pacientes</h1>
+          <p className="text-muted">Ficha, búsqueda y antecedentes clínicos de cada paciente.</p>
         </div>
         <button className="btn btn-primary" onClick={() => setMostrarForm(!mostrarForm)}>
           {mostrarForm ? 'Cancelar' : '+ Nueva paciente'}
@@ -149,97 +149,106 @@ function Pacientes() {
       </div>
 
       {mensaje.texto && (
-        <div className={`alert ${mensaje.tipo} mt-3`}>{mensaje.texto}</div>
+        <div className={`alert ${mensaje.tipo} mb-4`}>{mensaje.texto}</div>
       )}
 
-      <form onSubmit={handleBuscar} className="pacientes-buscador">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Buscar por RUT, nombre o apellido…"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
-        <button type="submit" className="btn btn-outline-primary">Buscar</button>
-      </form>
+      {/* Buscador envuelto en tarjeta clínica */}
+      <div className="card-clinica mb-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', padding: '20px', borderRadius: '8px' }}>
+        <form onSubmit={handleBuscar} className="d-flex gap-2">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Buscar por RUT, nombre o apellido…"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+          <button type="submit" className="btn btn-outline-primary">Buscar</button>
+        </form>
+      </div>
 
       {mostrarForm && (
-        <form onSubmit={handleSubmit} className="mt-3 pacientes-form">
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label className="form-label">RUT</label>
-              <input type="text" className="form-control" value={rut} onChange={(e) => setRut(e.target.value)} placeholder="Ej: 12.345.678-9" />
+        <div className="card-clinica mb-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', padding: '24px', borderRadius: '8px' }}>
+          <h4 className="mb-3" style={{ fontSize: '16px', fontWeight: '600' }}>Registro / Edición de Paciente</h4>
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">RUT</label>
+                <input type="text" className="form-control" value={rut} onChange={(e) => setRut(e.target.value)} placeholder="Ej: 12.345.678-9" />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Fecha de Nacimiento</label>
+                <input type="date" className="form-control" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Nombre</label>
+                <input type="text" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Apellido</label>
+                <input type="text" className="form-control" value={apellido} onChange={(e) => setApellido(e.target.value)} />
+              </div>
+              <div className="col-md-2 mb-3">
+                <label className="form-label">Edad</label>
+                <input type="number" className="form-control" value={edad} onChange={(e) => setEdad(e.target.value)} />
+              </div>
+              <div className="col-md-10 mb-3">
+                <label className="form-label">Dirección</label>
+                <input type="text" className="form-control" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Teléfono</label>
+                <input type="text" className="form-control" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej: +56912345678" />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Email (Opcional)</label>
+                <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
             </div>
-            <div className="col-md-6 mb-3">
-              <label className="form-label">Fecha de Nacimiento</label>
-              <input type="date" className="form-control" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} />
-            </div>
-            <div className="col-md-6 mb-3">
-              <label className="form-label">Nombre</label>
-              <input type="text" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} />
-            </div>
-            <div className="col-md-6 mb-3">
-              <label className="form-label">Apellido</label>
-              <input type="text" className="form-control" value={apellido} onChange={(e) => setApellido(e.target.value)} />
-            </div>
-            <div className="col-md-2 mb-3">
-              <label className="form-label">Edad</label>
-              <input type="number" className="form-control" value={edad} onChange={(e) => setEdad(e.target.value)} />
-            </div>
-            <div className="col-md-10 mb-3">
-              <label className="form-label">Dirección</label>
-              <input type="text" className="form-control" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
-            </div>
-            <div className="col-md-6 mb-3">
-              <label className="form-label">Teléfono</label>
-              <input type="text" className="form-control" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej: +56912345678" />
-            </div>
-            <div className="col-md-6 mb-3">
-              <label className="form-label">Email (Opcional)</label>
-              <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-          </div>
-          <button type="submit" className="btn btn-primary">Registrar paciente</button>
-        </form>
+            <button type="submit" className="btn btn-primary">Registrar paciente</button>
+          </form>
+        </div>
       )}
 
-      <div className="table-responsive mt-4">
-        <table className="table table-striped table-hover">
-          <thead className="table-dark">
-            <tr>
-              <th>RUT</th>
-              <th>Nombre</th>
-              <th>Edad</th>
-              <th>Teléfono</th>
-              <th>Antecedentes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cargando && <tr><td colSpan="5">Cargando...</td></tr>}
-            {!cargando && pacientes.length === 0 && (
-              <tr><td colSpan="5">No se encontraron pacientes.</td></tr>
-            )}
-            {pacientes.map((p) => (
-              <tr key={p.id}>
-                <td>{p.rut}</td>
-                <td>{p.nombre} {p.apellido}</td>
-                <td>{p.edad}</td>
-                <td>{p.telefono}</td>
-                <td>
-                  <button className="btn btn-sm btn-outline-secondary" onClick={() => abrirAntecedentes(p)}>
-                    {p.antecedentes ? 'Ver / editar' : 'Agregar'}
-                  </button>
-                </td>
+      {/* Tabla limpia dentro de tarjeta blanca */}
+      <div className="card-clinica" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', padding: '24px', borderRadius: '8px' }}>
+        <div className="table-responsive">
+          <table className="table table-hover align-middle mb-0">
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--border-light)', color: 'var(--text-muted)', fontSize: '13px' }}>
+                <th>RUT</th>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Teléfono</th>
+                <th className="text-end">Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {cargando && <tr><td colSpan="5" className="text-center py-4">Cargando...</td></tr>}
+              {!cargando && pacientes.length === 0 && (
+                <tr><td colSpan="5" className="text-center py-4">No se encontraron pacientes.</td></tr>
+              )}
+              {pacientes.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.rut}</td>
+                  <td>{p.nombre} {p.apellido}</td>
+                  <td>{p.edad}</td>
+                  <td>{p.telefono}</td>
+                  <td className="text-end">
+                    <button className="btn btn-sm btn-outline-primary" onClick={() => abrirAntecedentes(p)}>
+                      {p.antecedentes ? 'Ver / editar' : 'Agregar'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {pacienteAntecedentes && (
-        <div className="pacientes-modal">
-          <div className="pacientes-modal__card">
-            <h3>Antecedentes clínicos — {pacienteAntecedentes.nombre} {pacienteAntecedentes.apellido}</h3>
+        <div className="pacientes-modal" style={{ position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div className="pacientes-modal__card card-clinica" style={{ background: 'var(--bg-surface)', padding: '32px', borderRadius: '12px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h3 className="mb-4" style={{ fontSize: '18px', fontWeight: '600' }}>Antecedentes clínicos — {pacienteAntecedentes.nombre} {pacienteAntecedentes.apellido}</h3>
             <form onSubmit={guardarAntecedentes}>
               <div className="row">
                 <div className="col-md-3 mb-3">
@@ -260,18 +269,18 @@ function Pacientes() {
                 </div>
               </div>
 
-              <div className="mb-3 pacientes-modal__checks">
+              <div className="mb-3 d-flex gap-4">
                 <label className="form-check-label">
-                  <input type="checkbox" className="form-check-input" checked={tieneHipertension} onChange={(e) => setTieneHipertension(e.target.checked)} />
-                  {' '}Hipertensión
+                  <input type="checkbox" className="form-check-input me-2" checked={tieneHipertension} onChange={(e) => setTieneHipertension(e.target.checked)} />
+                  Hipertensión
                 </label>
                 <label className="form-check-label">
-                  <input type="checkbox" className="form-check-input" checked={tieneDiabetesGestacional} onChange={(e) => setTieneDiabetesGestacional(e.target.checked)} />
-                  {' '}Diabetes gestacional
+                  <input type="checkbox" className="form-check-input me-2" checked={tieneDiabetesGestacional} onChange={(e) => setTieneDiabetesGestacional(e.target.checked)} />
+                  Diabetes gestacional
                 </label>
                 <label className="form-check-label">
-                  <input type="checkbox" className="form-check-input" checked={tienePreclampsia} onChange={(e) => setTienePreclampsia(e.target.checked)} />
-                  {' '}Preeclampsia
+                  <input type="checkbox" className="form-check-input me-2" checked={tienePreclampsia} onChange={(e) => setTienePreclampsia(e.target.checked)} />
+                  Preeclampsia
                 </label>
               </div>
 
@@ -295,7 +304,7 @@ function Pacientes() {
                 <textarea className="form-control" rows="2" value={observaciones} onChange={(e) => setObservaciones(e.target.value)} />
               </div>
 
-              <div className="pacientes-modal__actions">
+              <div className="d-flex justify-content-end gap-2 mt-4">
                 <button type="button" className="btn btn-outline-secondary" onClick={() => setPacienteAntecedentes(null)}>
                   Cancelar
                 </button>

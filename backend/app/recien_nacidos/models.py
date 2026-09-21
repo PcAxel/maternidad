@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from app.partos.models import Parto
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -8,7 +9,7 @@ class RecienNacido(models.Model):
     
     # Identificador único
     codigo_qr = models.CharField(max_length=100, unique=True, blank=True)
-    numero_interno = models.CharField(max_length=20, unique=True)
+    numero_interno = models.CharField(max_length=20, unique=True, blank=True)
     
     # Datos clínicos
     peso = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0.5), MaxValueValidator(6.0)])
@@ -41,6 +42,17 @@ class RecienNacido(models.Model):
     
     fecha_nacimiento = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        # Autogenerar un codigo_qr único si viene vacío
+        if not self.codigo_qr:
+            self.codigo_qr = str(uuid.uuid4())
+            
+        # Autogenerar un numero_interno único si viene vacío (ej: RN-A1B2C3D4)
+        if not self.numero_interno:
+            self.numero_interno = f"RN-{str(uuid.uuid4())[:8].upper()}"
+            
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"RN {self.numero_interno} - {self.paciente_madre.nombre}"

@@ -18,20 +18,19 @@
 }
 
 .page-header__title {
-  font-family: 'Fraunces', serif;
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 1.8rem;
+  font-weight: 700;
   margin: 0 0 0.5rem;
-  color: #16231f;
+  color: #0f172a;
 }
 
 .page-intro {
-  color: #5c6b65;
+  color: #64748b;
   font-size: 0.95rem;
   margin: 0;
 }
 
-/* Agrupa los botones a la derecha con una pequeña separación */
+/* Agrupa los botones a la derecha con separación */
 .header-actions {
   display: flex;
   gap: 1rem;
@@ -39,8 +38,8 @@
 
 /* Botón primario de consulta */
 .btn-primary {
-  background-color: #1f4b4c !important;
-  border-color: #1f4b4c !important;
+  background-color: #0F766E !important;
+  border-color: #0F766E !important;
   border-radius: 8px !important;
   padding: 0.6rem 1.25rem !important;
   font-weight: 500 !important;
@@ -48,16 +47,16 @@
 }
 
 .btn-primary:hover {
-  background-color: #16231f !important;
-  border-color: #16231f !important;
+  background-color: #115e59 !important;
+  border-color: #115e59 !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(31, 75, 76, 0.2);
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.2);
 }
 
-/* Botón de Excel (Verde corporativo) */
+/* Botón de Excel */
 .btn-outline-success {
-  color: #1f4b4c !important;
-  border-color: #1f4b4c !important;
+  color: #0F766E !important;
+  border-color: #0F766E !important;
   border-radius: 8px !important;
   padding: 0.6rem 1.25rem !important;
   font-weight: 500 !important;
@@ -65,13 +64,13 @@
 }
 
 .btn-outline-success:hover {
-  background-color: #1f4b4c !important;
+  background-color: #0F766E !important;
   color: #ffffff !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(31, 75, 76, 0.15);
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.15);
 }
 
-/* Botón de PDF (Rojo elegante) */
+/* Botón de PDF */
 .btn-outline-danger {
   color: #df4759 !important;
   border-color: #df4759 !important;

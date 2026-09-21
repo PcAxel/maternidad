@@ -1,82 +1,125 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import MainLayout from '../layouts/MainLayout'
 import api from '../services/api'
+import './AdminUsuarios.css'
 
 function AdminUsuarios() {
-  const [formData, setFormData] = useState({
+  const [usuarios, setUsuarios] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [mensajeExito, setMensajeExito] = useState('')
+
+  // Estados del formulario para crear nuevo personal
+  const [form, setForm] = useState({
     username: '',
+    password: '',
     first_name: '',
     last_name: '',
     email: '',
-    password: '',
     rol: 'MATRONA',
-    telefono: '',
     especialidad: ''
   })
-  
-  const [mensaje, setMensaje] = useState({ texto: '', tipo: '' })
-  const [cargando, setCargando] = useState(false)
+
+  // Cargar la lista de usuarios de forma segura
+  useEffect(() => {
+    let isMounted = true;
+
+    const cargarUsuarios = async () => {
+      setLoading(true)
+      try {
+        const response = await api.get('/usuarios/') 
+        
+        if (isMounted) {
+          // Solución clave: Validamos si viene paginado o directo como arreglo
+          const dataUsuarios = Array.isArray(response.data) 
+            ? response.data 
+            : (response.data.results || [])
+            
+          setUsuarios(dataUsuarios)
+          setError('')
+        }
+      } catch (err) {
+        console.error("Error al cargar usuarios:", err)
+        if (isMounted) {
+          setError('No se pudo cargar la lista de personal.')
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    cargarUsuarios()
+
+    return () => {
+      isMounted = false;
+    }
+  }, [])
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    setForm({ ...form, [e.target.name]: e.target.value })
   }
 
+  // Función para crear un nuevo usuario
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setCargando(true)
-    setMensaje({ texto: '', tipo: '' })
+    setMensajeExito('')
+    setError('')
 
     try {
-      // Tu api.js se encargará de inyectar el token del ADMIN_SISTEMA automáticamente
-      await api.post('/usuarios/', formData) 
+      await api.post('/usuarios/', form)
+      setMensajeExito('¡Cuenta de personal creada exitosamente!')
+      setForm({
+        username: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+        email: '',
+        rol: 'MATRONA',
+        especialidad: ''
+      })
       
-      setMensaje({ texto: 'Personal registrado exitosamente en el sistema.', tipo: 'success' })
-      setFormData({
-        username: '', first_name: '', last_name: '', email: '', 
-        password: '', rol: 'MATRONA', telefono: '', especialidad: ''
-      })
-    } catch (error) {
-      console.error('Error:', error.response?.data)
-      setMensaje({ 
-        texto: 'Error al registrar. Verifica que el nombre de usuario no exista ya.', 
-        tipo: 'error' 
-      })
-    } finally {
-      setCargando(false)
+      // Recargamos la tabla de forma segura
+      const response = await api.get('/usuarios/')
+      const dataUsuarios = Array.isArray(response.data) ? response.data : (response.data.results || [])
+      setUsuarios(dataUsuarios)
+    } catch (err) {
+      console.error("Error al crear usuario:", err)
+      setError(err.response?.data?.error || 'Error al registrar el nuevo usuario.')
+    }
+  }
+
+  // Función para activar / desactivar usuario
+  const toggleEstadoUsuario = async (id, estadoActual) => {
+    try {
+      await api.patch(`/usuarios/${id}/`, { is_active: !estadoActual })
+      
+      // Actualizamos el estado localmente de inmediato para evitar recargas innecesarias
+      setUsuarios(usuarios.map(u => u.id === id ? { ...u, is_active: !estadoActual } : u))
+    } catch (err) {
+      alert('No se pudo cambiar el estado del usuario.')
     }
   }
 
   return (
     <MainLayout>
       <div className="page-header">
-        <h1 className="page-header__title">Gestión de Personal</h1>
-        <p className="page-intro">Alta de nuevos perfiles médicos y administrativos.</p>
+        <div className="page-header__content">
+          <h1 className="page-header__title">Gestión de Personal</h1>
+          <p className="page-intro">Alta, control y administración de perfiles médicos y administrativos de la unidad.</p>
+        </div>
       </div>
 
-      <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-        {mensaje.texto && (
-          <div style={{
-            padding: '1rem',
-            marginBottom: '1.5rem',
-            borderRadius: '8px',
-            backgroundColor: mensaje.tipo === 'success' ? 'rgba(31, 75, 76, 0.1)' : 'rgba(223, 71, 89, 0.1)',
-            color: mensaje.tipo === 'success' ? 'var(--color-primary-dark)' : 'var(--color-accent)',
-            border: `1px solid ${mensaje.tipo === 'success' ? 'var(--color-primary)' : 'var(--color-accent)'}`
-          }}>
-            {mensaje.texto}
-          </div>
-        )}
+      {error && <div className="alert alert-danger">{error}</div>}
+      {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
 
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          
-          <div style={{ gridColumn: '1 / -1' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Rol en el Sistema</label>
-            <select 
-              name="rol" 
-              value={formData.rol} 
-              onChange={handleChange}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-line)', background: 'transparent', outline: 'none' }}
-            >
+      <div className="card shadow-sm p-4 mb-5 border-0 bg-white" style={{ borderRadius: '12px' }}>
+        <h5 className="fw-bold mb-3" style={{ color: '#0f172a' }}>Registrar Nuevo Perfil</h5>
+        <form onSubmit={handleSubmit} className="row g-3">
+          <div className="col-md-4">
+            <label className="form-label fw-semibold">Rol en el Sistema</label>
+            <select className="form-select" name="rol" value={form.rol} onChange={handleChange}>
               <option value="MATRONA">Matrona</option>
               <option value="MEDICO">Médico</option>
               <option value="ENFERMERO">Enfermero</option>
@@ -87,48 +130,95 @@ function AdminUsuarios() {
             </select>
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Nombre de Usuario (Login)</label>
-            <input type="text" name="username" required value={formData.username} onChange={handleChange} 
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-line)', background: 'transparent', outline: 'none' }} />
+          <div className="col-md-4">
+            <label className="form-label fw-semibold">Nombre de Usuario (Login)</label>
+            <input type="text" className="form-control" name="username" value={form.username} onChange={handleChange} required placeholder="Ej. asilva" />
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Contraseña Temporal</label>
-            <input type="password" name="password" required value={formData.password} onChange={handleChange} minLength="6"
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-line)', background: 'transparent', outline: 'none' }} />
+          <div className="col-md-4">
+            <label className="form-label fw-semibold">Contraseña Temporal</label>
+            <input type="password" className="form-control" name="password" value={form.password} onChange={handleChange} required placeholder="••••••••" />
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Nombres</label>
-            <input type="text" name="first_name" required value={formData.first_name} onChange={handleChange} 
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-line)', background: 'transparent', outline: 'none' }} />
+          <div className="col-md-4">
+            <label className="form-label fw-semibold">Nombres</label>
+            <input type="text" className="form-control" name="first_name" value={form.first_name} onChange={handleChange} placeholder="Alejandro" />
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Apellidos</label>
-            <input type="text" name="last_name" required value={formData.last_name} onChange={handleChange} 
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-line)', background: 'transparent', outline: 'none' }} />
+          <div className="col-md-4">
+            <label className="form-label fw-semibold">Apellidos</label>
+            <input type="text" className="form-control" name="last_name" value={form.last_name} onChange={handleChange} placeholder="Silva" />
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Correo Electrónico</label>
-            <input type="email" name="email" required value={formData.email} onChange={handleChange} 
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-line)', background: 'transparent', outline: 'none' }} />
+          <div className="col-md-4">
+            <label className="form-label fw-semibold">Correo Electrónico</label>
+            <input type="email" className="form-control" name="email" value={form.email} onChange={handleChange} placeholder="correo@hospital.cl" />
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Especialidad (Opcional)</label>
-            <input type="text" name="especialidad" value={formData.especialidad} onChange={handleChange} placeholder="Ej. Obstetricia"
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-line)', background: 'transparent', outline: 'none' }} />
+          <div className="col-md-12">
+            <label className="form-label fw-semibold">Especialidad (Opcional)</label>
+            <input type="text" className="form-control" name="especialidad" value={form.especialidad} onChange={handleChange} placeholder="Ej. Obstetricia y Ginecología" />
           </div>
 
-          <div style={{ gridColumn: '1 / -1', marginTop: '1rem' }}>
-            <button type="submit" className="btn-primary" disabled={cargando} style={{ width: '100%', cursor: 'pointer' }}>
-              {cargando ? 'Procesando...' : 'Crear Cuenta de Personal'}
+          <div className="col-12 text-end mt-4">
+            <button type="submit" className="btn btn-primary px-4">
+              Crear Cuenta de Personal
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="card shadow-sm border-0 overflow-hidden" style={{ borderRadius: '12px' }}>
+        <div className="p-4 bg-white border-bottom">
+          <h5 className="fw-bold m-0" style={{ color: '#0f172a' }}>Personal Registrado en la Unidad</h5>
+        </div>
+        <div className="table-responsive m-0">
+          <table className="table table-hover align-middle mb-0">
+            <thead className="table-light text-secondary">
+              <tr>
+                <th className="py-3 px-4">Nombre Completo</th>
+                <th className="py-3">Usuario</th>
+                <th className="py-3">Rol</th>
+                <th className="py-3">Estado</th>
+                <th className="py-3 text-end px-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading && (
+                <tr><td colSpan="5" className="text-center py-4 text-muted">Cargando personal...</td></tr>
+              )}
+              {!loading && usuarios.length === 0 && (
+                <tr><td colSpan="5" className="text-center py-4 text-muted">No hay registros de personal activos.</td></tr>
+              )}
+              {!loading && usuarios.map((user) => (
+                <tr key={user.id}>
+                  <td className="px-4 fw-semibold text-dark">{user.first_name} {user.last_name}</td>
+                  <td className="text-muted">{user.username}</td>
+                  <td>
+                    <span className="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
+                      {user.rol || 'PERSONAL'}
+                    </span>
+                  </td>
+                  <td>
+                    {user.is_active !== false ? (
+                      <span className="badge bg-success-subtle text-success px-2 py-1">Conectado / Activo</span>
+                    ) : (
+                      <span className="badge bg-danger-subtle text-danger px-2 py-1">Desactivado</span>
+                    )}
+                  </td>
+                  <td className="text-end px-4">
+                    <button 
+                      className={`btn btn-sm ${user.is_active !== false ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                      onClick={() => toggleEstadoUsuario(user.id, user.is_active !== false)}
+                    >
+                      {user.is_active !== false ? 'Desactivar / Desconectar' : 'Activar'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </MainLayout>
   )

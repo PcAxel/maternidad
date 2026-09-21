@@ -1,63 +1,309 @@
-/* Contenedor tipo tarjeta para el encabezado */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #ffffff;
-  border: 1px solid #dfe3df;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2.5rem;
-  box-shadow: 0 4px 15px rgba(22, 35, 31, 0.04);
+:root {
+  --color-whitesmoke: #f8fafc;
+  --color-white: #ffffff;
+  --color-gray-100: #0f172a;
+  --color-slategray: #64748b;
+  --color-darkcyan: #0F766E;
+  --color-lightseagreen: #14b8a6;
+  --color-teal: #0d9488;
+  --color-mintcream-100: #f0fdfa;
+  --color-mintcream-200: #ccfbf1;
+  --color-mediumseagreen: #059669;
+  --color-lemonchiffon: #fef3c7;
+  --color-chocolate-100: #d97706;
+  --color-aliceblue-100: #f1f5f9;
+  --color-gainsboro-200: #e2e8f0;
+  --color-gainsboro-300: #cbd5e1;
+  --color-lightslategray: #94a3b8;
+  
+  --border-1: 1px solid #e2e8f0;
+  --border-2: 1px solid #cbd5e1;
+  
+  --br-4: 4px;
+  --br-6: 6px;
+  --br-8: 8px;
+  
+  --padding-2: 2px;
+  --padding-4: 4px;
+  --padding-6: 6px;
+  --padding-8: 8px;
+  --padding-11: 11px;
+  --padding-12: 12px;
+  --padding-14: 14px;
+  --padding-15: 15px;
+  --padding-16: 16px;
+  --padding-20: 20px;
+  --padding-24: 24px;
+  --padding-32: 32px;
+  
+  --gap-4: 4px;
+  --gap-8: 8px;
+  --gap-12: 12px;
+  --gap-16: 16px;
+  --gap-20: 20px;
+  --gap-24: 24px;
+  
+  --width-200: 200px;
+  --width-300: 300px;
+  
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-24: 24px;
+  --font-inter: 'Inter', system-ui, sans-serif;
 }
 
-.page-header__content {
+.gestionAltasContent {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  gap: var(--gap-24);
+  font-family: var(--font-inter);
+  width: 100%;
 }
 
-.page-header__title {
-  font-family: 'Fraunces', serif;
-  font-size: 2rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem;
-  color: #16231f;
+.titleSection {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--gap-20);
+  color: var(--color-gray-100);
 }
 
-.page-intro {
-  color: #5c6b65;
-  font-size: 0.95rem;
+.frame8 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-4);
+  min-width: 300px;
+}
+
+.gestinDeAltas {
   margin: 0;
+  font-size: var(--fs-24);
+  font-weight: 700;
 }
 
-/* Forzamos al botón primario de Bootstrap a usar tu paleta verde */
-.btn-primary {
-  background-color: #1f4b4c !important;
-  border-color: #1f4b4c !important;
-  border-radius: 8px !important;
+.mduloDeFormalizacin {
+  font-size: var(--fs-14);
+  color: var(--color-slategray);
 }
 
-.btn-primary:hover {
-  background-color: #16231f !important;
-  border-color: #16231f !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(31, 75, 76, 0.2);
+.headerActions {
+  display: flex;
+  align-items: center;
+  font-size: var(--fs-13);
+  color: var(--color-slategray);
 }
 
-/* Personalizamos el botón de Exportar a Excel para que combine con tu sistema */
-.btn-outline-success {
-  color: #1f4b4c !important;
-  border-color: #1f4b4c !important;
-  border-radius: 8px !important;
-  padding: 0.6rem 1.25rem !important;
-  font-weight: 500 !important;
-  transition: all 200ms ease !important;
+.exportButton {
+  display: flex;
+  align-items: center;
+  border-radius: var(--br-6);
+  background-color: var(--color-white);
+  border: var(--border-1);
+  padding: var(--padding-8) var(--padding-15);
+  gap: var(--gap-8);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.btn-outline-success:hover {
-  background-color: #1f4b4c !important;
-  color: #ffffff !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(31, 75, 76, 0.15);
+.exportButton:hover {
+  background-color: var(--color-aliceblue-100);
+}
+
+.altasText {
+  font-weight: 500;
+}
+
+.infoBanner {
+  align-self: stretch;
+  border-radius: var(--br-8);
+  background-color: var(--color-mintcream-100);
+  border: var(--border-2);
+  border-color: var(--color-mintcream-200);
+  display: flex;
+  align-items: center;
+  padding: var(--padding-14) var(--padding-15);
+  gap: var(--gap-12);
+  margin-bottom: 8px;
+}
+
+.informacinParaEmitir {
+  flex: 1;
+  font-size: var(--fs-13);
+  color: var(--color-teal);
+  font-weight: 500;
+}
+
+.altasTable {
+  align-self: stretch;
+  border-radius: var(--br-8);
+  background-color: var(--color-white);
+  border: var(--border-1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableHeaderRow {
+  background-color: var(--color-aliceblue-100);
+  display: flex;
+  align-items: center;
+  padding: var(--padding-12) var(--padding-20);
+  gap: var(--gap-16);
+  border-bottom: var(--border-1);
+}
+
+.pacienteMadre, .boletnDeServicio, .accionesDeFormalizacin {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--color-slategray);
+}
+
+.pacienteMadre { width: var(--width-300); flex-shrink: 0; }
+.boletnDeServicio { width: var(--width-200); flex-shrink: 0; }
+.accionesDeFormalizacin { flex: 1; min-width: 123px; }
+
+.tableRows, .tableRows2 {
+  display: flex;
+  align-items: center;
+  padding: var(--padding-16) var(--padding-20);
+  gap: var(--gap-16);
+  border-bottom: var(--border-1);
+}
+
+.tableRows { background-color: var(--color-white); }
+.tableRows2 { background-color: var(--color-whitesmoke); }
+.tableRows:last-child, .tableRows2:last-child { border-bottom: none; }
+
+.franciscaMuozSoto {
+  width: var(--width-300);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--color-gray-100);
+  flex-shrink: 0;
+}
+
+.bo2026904 {
+  width: var(--width-200);
+  font-size: var(--fs-13);
+  color: var(--color-slategray);
+  flex-shrink: 0;
+}
+
+.clinicalStatusCell {
+  width: var(--width-200);
+  display: flex;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.clinicalStatusWrapper {
+  border-radius: var(--br-4);
+  background-color: var(--color-mintcream-200);
+  padding: var(--padding-2) var(--padding-8);
+}
+
+.confirmada {
+  font-size: var(--fs-11);
+  font-weight: 600;
+  color: var(--color-mediumseagreen);
+}
+
+.frame12 {
+  border-radius: var(--br-4);
+  background-color: var(--color-lemonchiffon);
+  padding: var(--padding-2) var(--padding-8);
+}
+
+.pendiente {
+  font-size: var(--fs-11);
+  font-weight: 600;
+  color: var(--color-chocolate-100);
+}
+
+.actionButtonsGroup {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-8);
+  min-width: 244px;
+}
+
+.clinicalActionButton {
+  border-radius: var(--br-6);
+  background-color: var(--color-aliceblue-100);
+  border: var(--border-1);
+  padding: var(--padding-4) var(--padding-11);
+  opacity: 0.7;
+}
+
+.clnica {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--color-slategray);
+}
+
+.frame14 {
+  cursor: pointer;
+  border: var(--border-2);
+  padding: var(--padding-4) var(--padding-11);
+  background-color: var(--color-mintcream-100);
+  border-radius: var(--br-6);
+  transition: all 0.2s ease;
+}
+
+.frame14:hover {
+  background-color: var(--color-gainsboro-200);
+  border-color: var(--color-lightseagreen);
+}
+
+.validarPago {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--color-darkcyan);
+}
+
+.issueDischargeButton {
+  cursor: pointer;
+  border: 0;
+  padding: var(--padding-6) var(--padding-16);
+  background-color: var(--color-darkcyan);
+  border-radius: var(--br-6);
+  transition: background-color 0.2s ease;
+}
+
+.issueDischargeButton:hover {
+  background-color: var(--color-lightseagreen);
+}
+
+.emitirAlta {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.frame22 {
+  padding: var(--padding-6) var(--padding-16);
+  background-color: var(--color-aliceblue-100);
+  border-radius: var(--br-6);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emitirAlta2 {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--color-lightslategray);
+}
+
+@media screen and (max-width: 1050px) {
+  .tableHeaderRow { display: none; }
+  .tableRows, .tableRows2 { flex-direction: column; align-items: flex-start; }
+  .pacienteMadre, .boletnDeServicio, .clinicalStatusCell { width: 100%; margin-bottom: 8px; }
 }

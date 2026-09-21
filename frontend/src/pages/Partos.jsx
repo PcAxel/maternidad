@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import MainLayout from '../layouts/MainLayout'
-import axios from 'axios'
-import './Partos.css' // <-- Conectamos los estilos
+import api from '../services/api' // Usamos tu instancia de axios configurada
+import './Partos.css'
 
 function Partos() {
-  // Estados para el formulario basados en los requerimientos del Módulo 2
-  const [pacienteId, setPacienteId] = useState('') // El ID o RUT de la madre
+  const [pacientes, setPacientes] = useState([]) // Lista de pacientes para el selector
+  const [pacienteId, setPacienteId] = useState('') 
   const [tipoParto, setTipoParto] = useState('')
   const [fechaInicio, setFechaInicio] = useState('')
   const [fechaTermino, setFechaTermino] = useState('')
@@ -14,10 +14,25 @@ function Partos() {
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' })
   const [loading, setLoading] = useState(false)
 
+  // Cargar la lista de pacientes reales al abrir la página
+  useEffect(() => {
+    const cargarPacientes = async () => {
+      try {
+        const respuesta = await api.get('/pacientes/')
+        // Dependiendo de si tu API devuelve un paginado (results) o un array directo
+        const lista = respuesta.data.results || respuesta.data
+        setPacientes(lista)
+      } catch (error) {
+        console.error("Error al cargar pacientes", error)
+        setMensaje({ texto: 'No se pudo cargar la lista de pacientes.', tipo: 'alert-warning' })
+      }
+    }
+    cargarPacientes()
+  }, [])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Validaciones obligatorias
     if (!pacienteId || !tipoParto || !fechaInicio) {
       setMensaje({ texto: 'Faltan datos obligatorios (Paciente, Tipo de Parto y Fecha de Inicio).', tipo: 'alert-warning' })
       return
@@ -30,29 +45,27 @@ function Partos() {
 
     setLoading(true)
 
-    // Armamos el paquete de datos para Django
     const payload = {
-      paciente: pacienteId,
+      paciente: parseInt(pacienteId, 10), // Enviamos el ID numérico exacto de la BD
       tipo: tipoParto,
       fecha_inicio: fechaInicio,
-      fecha_termino: fechaTermino || null, // Puede estar en curso
+      fecha_termino: fechaTermino || null,
       tiene_complicaciones: tieneComplicaciones,
-      descripcion_complicaciones: tieneComplicaciones ? detalleComplicaciones : ''
+      complicaciones: tieneComplicaciones ? [detalleComplicaciones] : []
     }
 
     try {
-      const respuesta = await axios.post('http://localhost:8000/api/partos/', payload)
+      const respuesta = await api.post('/partos/', payload)
       
       if (respuesta.status === 201) {
         setMensaje({ texto: 'Parto registrado exitosamente.', tipo: 'alert-success' })
-        // Limpiamos el formulario
         setPacienteId(''); setTipoParto(''); setFechaInicio(''); 
         setFechaTermino(''); setTieneComplicaciones(false); setDetalleComplicaciones('');
       }
     } catch (error) {
       console.error("Error al registrar parto:", error.response?.data)
       setMensaje({ 
-        texto: 'Error al conectar con el servidor: ' + JSON.stringify(error.response?.data || error.message), 
+        texto: 'Error del servidor: ' + JSON.stringify(error.response?.data || error.message), 
         tipo: 'alert-danger' 
       })
     } finally {
@@ -62,7 +75,6 @@ function Partos() {
 
   return (
     <MainLayout>
-      {/* NUEVO ENCABEZADO ESTILO TARJETA */}
       <div className="page-header">
         <div className="page-header__content">
           <h1 className="page-header__title">Gestión de Partos</h1>
@@ -73,30 +85,34 @@ function Partos() {
       <div className="card shadow-sm p-4 mt-4">
         <form onSubmit={handleSubmit}>
           <div className="row">
-            {/* Buscador o Selector de Paciente */}
+            {/* Selector de Pacientes (Adiós al error de ID inexistente) */}
             <div className="col-md-6 mb-3">
-              <label className="form-label fw-bold">ID Paciente (Madre)</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="Ingrese ID o RUT de la paciente"
+              <label className="form-label fw-bold">Seleccionar Paciente (Madre)</label>
+              <select 
+                className="form-select" 
                 value={pacienteId} 
-                onChange={(e) => setPacienteId(e.target.value)} 
-              />
+                onChange={(e) => setPacienteId(e.target.value)}
+              >
+                <option value="">Seleccione una paciente registrada...</option>
+                {pacientes.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nombre} {p.apellido} (RUT: {p.rut})
+                  </option>
+                ))}
+              </select>
+              <small className="text-muted">Seleccione a la paciente de la lista de registros activos.</small>
             </div>
 
-            {/* Tipo de Parto */}
             <div className="col-md-6 mb-3">
               <label className="form-label fw-bold">Tipo de Parto</label>
               <select className="form-select" value={tipoParto} onChange={(e) => setTipoParto(e.target.value)}>
                 <option value="">Seleccione una opción...</option>
-                <option value="Natural">Natural</option>
-                <option value="Cesárea">Cesárea</option>
-                <option value="Instrumental">Instrumental</option>
+                <option value="NATURAL">Natural</option>
+                <option value="CESAREA">Cesárea</option>
+                <option value="INSTRUMENTAL">Instrumental</option>
               </select>
             </div>
 
-            {/* Tiempos */}
             <div className="col-md-6 mb-3">
               <label className="form-label fw-bold">Fecha y Hora de Inicio</label>
               <input 
@@ -118,7 +134,6 @@ function Partos() {
               <small className="text-muted">Dejar en blanco si el parto está en curso.</small>
             </div>
 
-            {/* Complicaciones */}
             <div className="col-12 mb-3 mt-3 border-top pt-3">
               <div className="form-check form-switch">
                 <input 
@@ -135,7 +150,6 @@ function Partos() {
               </div>
             </div>
 
-            {/* Textarea dinámico: Solo aparece si hay complicaciones */}
             {tieneComplicaciones && (
               <div className="col-12 mb-3">
                 <label className="form-label">Descripción de las complicaciones</label>
@@ -150,7 +164,6 @@ function Partos() {
             )}
           </div>
 
-          {/* Mensajes de alerta */}
           {mensaje.texto && (
             <div className={`alert ${mensaje.tipo} mt-3`}>
               {mensaje.texto}

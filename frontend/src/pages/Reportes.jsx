@@ -24,7 +24,6 @@ function Reportes() {
     totalPartos: 0
   })
 
-  // Datos estructurados para alimentar los gráficos visuales de Recharts
   const [datosGrafico, setDatosGrafico] = useState([])
   const [datosPastel, setDatosPastel] = useState([])
 
@@ -70,14 +69,12 @@ function Reportes() {
         promedioHospitalizacion: promedioDiasNum
       })
 
-      // Alimentamos el gráfico de barras comparativo
       setDatosGrafico([
         { name: 'Total Partos', valor: partosNum },
         { name: 'Bajo Peso', valor: bajoPesoNum },
         { name: 'Días Estada (Prom)', valor: promedioDiasNum }
       ])
 
-      // Alimentamos el gráfico circular de proporción
       setDatosPastel([
         { name: 'Cesáreas (%)', value: cesareasNum },
         { name: 'Partos Vaginales / Otros (%)', value: Math.max(0, 100 - cesareasNum) }
@@ -91,7 +88,6 @@ function Reportes() {
     }
   }
 
-  // Función para generar y descargar el Excel con validación de fechas
   const handleGenerarExcel = async () => {
     if (!fechaInicio || !fechaFin) {
       alert("⚠️ Error: Debe ingresar la fecha de inicio y la fecha de término para generar el reporte en Excel.");
@@ -100,27 +96,19 @@ function Reportes() {
 
     try {
       setCargandoExcel(true);
-      
       const response = await api.get('/reportes/excel/', {
-        params: {
-          fecha_inicio: fechaInicio,
-          fecha_fin: fechaFin,
-          ...(tipoParto && { tipo_parto: tipoParto }),
-          ...(patologia && { patologia: patologia }),
-        },
+        params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin, ...(tipoParto && { tipo_parto: tipoParto }), ...(patologia && { patologia: patologia }) },
         responseType: 'blob',
       });
 
       const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
-
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `Reporte_Maternidad_${fechaInicio}_al_${fechaFin}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-
       setCargandoExcel(false);
     } catch (error) {
       console.error("Error al generar el excel:", error);
@@ -137,12 +125,7 @@ function Reportes() {
     try {
       setCargandoPdf(true);
       const response = await api.get('/reportes/pdf/', {
-        params: {
-          fecha_inicio: fechaInicio,
-          fecha_fin: fechaFin,
-          ...(tipoParto && { tipo_parto: tipoParto }),
-          ...(patologia && { patologia: patologia }),
-        },
+        params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin, ...(tipoParto && { tipo_parto: tipoParto }), ...(patologia && { patologia: patologia }) },
         responseType: 'blob',
       });
       const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -161,11 +144,11 @@ function Reportes() {
     }
   };
 
-  // Colores profesionales para los gráficos circulares
-  const COLORS = ['#1f4b4c', '#df4759', '#f39c12', '#3498db'];
+  const COLORS = ['#0F766E', '#df4759', '#f39c12', '#3498db'];
 
   return (
     <MainLayout>
+      {/* Encabezado Principal estilo tarjeta */}
       <div className="page-header">
         <div className="page-header__content">
           <h1 className="page-header__title">Infografía y Gráficos Estadísticos</h1>
@@ -176,11 +159,7 @@ function Reportes() {
           <button className="btn btn-outline-danger" onClick={handleGenerarPDF} disabled={cargandoPdf}>
             {cargandoPdf ? 'Generando PDF...' : '📄 Exportar PDF'}
           </button>
-          <button 
-            className="btn btn-outline-success" 
-            onClick={handleGenerarExcel}
-            disabled={cargandoExcel}
-          >
+          <button className="btn btn-outline-success" onClick={handleGenerarExcel} disabled={cargandoExcel}>
             {cargandoExcel ? 'Generando Excel...' : '📊 Exportar Excel'}
           </button>
         </div>
@@ -188,19 +167,19 @@ function Reportes() {
 
       {error && <div className="alert alert-danger mb-4">{error}</div>}
 
-      {/* Filtros de Fecha */}
-      <div className="card shadow-sm p-4 mb-4">
+      {/* Tarjeta de Filtros */}
+      <div className="card shadow-sm p-4 mb-4 border-0">
         <form onSubmit={consultarReporte} className="row align-items-end g-3">
-          <div className="col-md-4">
+          <div className="col-md-3">
             <label className="form-label fw-bold">Fecha Inicio</label>
             <input type="date" className="form-control" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} required />
           </div>
-          <div className="col-md-4">
+          <div className="col-md-3">
             <label className="form-label fw-bold">Fecha Fin</label>
             <input type="date" className="form-control" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} required />
           </div>
           <div className="col-md-2">
-            <label className="form-label fw-bold">Tipo de parto</label>
+            <label className="form-label fw-bold">Tipo de Parto</label>
             <select className="form-select" value={tipoParto} onChange={(e) => setTipoParto(e.target.value)}>
               <option value="">Todos</option>
               <option value="NATURAL">Natural</option>
@@ -217,9 +196,9 @@ function Reportes() {
               <option value="preclampsia">Preeclampsia</option>
             </select>
           </div>
-          <div className="col-md-4">
-            <button type="submit" className="btn btn-primary w-100 py-2" disabled={loading}>
-              {loading ? 'Generando gráficos...' : 'Generar Reporte Visual'}
+          <div className="col-md-2">
+            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+              {loading ? 'Generando...' : 'Generar Reporte'}
             </button>
           </div>
         </form>
@@ -227,8 +206,7 @@ function Reportes() {
 
       {/* SECCIÓN DE GRÁFICOS VISUALES */}
       <div className="row g-4 mb-4">
-        
-        {/* Gráfico 1: Gráfico de Barras Estadísticas */}
+        {/* Gráfico de Barras */}
         <div className="col-md-7">
           <div className="card shadow-sm p-4 border-0 h-100 bg-white">
             <h5 className="text-secondary fw-bold mb-3">Resumen Comparativo de Indicadores</h5>
@@ -238,29 +216,21 @@ function Reportes() {
                   <XAxis dataKey="name" stroke="#666" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="valor" fill="#1f4b4c" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="valor" fill="#0F766E" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
         </div>
 
-        {/* Gráfico 2: Gráfico Circular / Pastel */}
+        {/* Gráfico Circular */}
         <div className="col-md-5">
           <div className="card shadow-sm p-4 border-0 h-100 bg-white text-center">
             <h5 className="text-secondary fw-bold mb-3">Distribución Porcentual (Cesáreas)</h5>
             <div style={{ width: '100%', height: '260px' }}>
               <ResponsiveContainer>
                 <PieChart>
-                  <Pie
-                    data={datosPastel}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label
-                  >
+                  <Pie data={datosPastel} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label>
                     {datosPastel.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -272,27 +242,26 @@ function Reportes() {
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Tarjetas inferiores de apoyo numérico */}
       <div className="row g-3">
         <div className="col-md-4">
-          <div className="card p-3 border-0 shadow-sm text-center bg-light">
-            <span className="text-muted">Total Partos Analizados</span>
-            <h3 className="fw-bold text-dark mt-1">{indicadores.totalPartos}</h3>
+          <div className="card p-4 border-0 shadow-sm text-center bg-white">
+            <span className="text-muted fw-semibold">Total Partos Analizados</span>
+            <h3 className="fw-bold text-dark mt-2 mb-0">{indicadores.totalPartos}</h3>
           </div>
         </div>
         <div className="col-md-4">
-          <div className="card p-3 border-0 shadow-sm text-center bg-light">
-            <span className="text-muted">Neonatos con Bajo Peso</span>
-            <h3 className="fw-bold text-warning mt-1">{indicadores.rnBajoPeso}</h3>
+          <div className="card p-4 border-0 shadow-sm text-center bg-white">
+            <span className="text-muted fw-semibold">Neonatos con Bajo Peso</span>
+            <h3 className="fw-bold text-warning mt-2 mb-0">{indicadores.rnBajoPeso}</h3>
           </div>
         </div>
         <div className="col-md-4">
-          <div className="card p-3 border-0 shadow-sm text-center bg-light">
-            <span className="text-muted">Promedio de Estadía</span>
-            <h3 className="fw-bold text-info mt-1">{indicadores.promedioHospitalizacion} días</h3>
+          <div className="card p-4 border-0 shadow-sm text-center bg-white">
+            <span className="text-muted fw-semibold">Promedio de Estadía</span>
+            <h3 className="fw-bold text-info mt-2 mb-0">{indicadores.promedioHospitalizacion} días</h3>
           </div>
         </div>
       </div>

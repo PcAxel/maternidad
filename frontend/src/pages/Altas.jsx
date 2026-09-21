@@ -62,71 +62,134 @@ function Altas() {
 
   return (
     <MainLayout>
-      <div className="page-header">
-        <div className="page-header__content">
-          <h1 className="page-header__title">Gestión de Altas</h1>
-          <p className="page-intro">Módulo de formalización de egresos médicos y administrativos.</p>
+      <div className="gestionAltasContent">
+        
+        <section className="titleSection">
+          <div className="frame8">
+            <h3 className="gestinDeAltas">Gestión de Altas</h3>
+            <div className="mduloDeFormalizacin">
+              Módulo de formalización de egresos médicos y administrativos para pacientes de maternidad
+            </div>
+          </div>
+          <div className="headerActions">
+            <div className="exportButton">
+              {/* Puedes cambiar la ruta del src o usar un icono de librería si no tienes el SVG */}
+              <span style={{ fontSize: '16px' }}>📥</span>
+              <div className="altasText">Exportar Historial a Excel</div>
+            </div>
+          </div>
+        </section>
+
+        {mensaje && (
+          <div className="alert alert-warning mt-3" style={{ borderRadius: '8px' }}>
+            {mensaje}
+          </div>
+        )}
+
+        <div className="infoBanner">
+          <span style={{ fontSize: '20px' }}>ℹ️</span>
+          <div className="informacinParaEmitir">
+            Información: Para emitir el alta formal definitiva, tanto el Alta Clínica (Médico) como el Alta Administrativa (Finanzas/Admisión) deben estar confirmadas.
+          </div>
         </div>
-        <button className="btn btn-outline-success">Exportar Historial a Excel</button>
-      </div>
 
-      {mensaje && <div className="alert alert-warning">{mensaje}</div>}
+        <div className="altasTable">
+          <div className="tableHeaderRow">
+            <div className="pacienteMadre">Paciente (Madre)</div>
+            <div className="boletnDeServicio">Boletín de Servicio</div>
+            <div className="boletnDeServicio">Alta Clínica (Médico)</div>
+            <div className="boletnDeServicio">Alta Admin (Administrativa)</div>
+            <div className="accionesDeFormalizacin">Acciones de Formalización</div>
+          </div>
 
-      <div className="table-responsive mt-4">
-        <table className="table table-striped table-hover">
-          <thead className="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Paciente (Madre)</th>
-              <th>Recién Nacido</th>
-              <th>Alta Clínica (Médico)</th>
-              <th>Alta Admin (Administrativo)</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cargando && (
-              <tr><td colSpan="6">Cargando...</td></tr>
-            )}
-            {!cargando && altasPendientes.length === 0 && (
-              <tr><td colSpan="6">No hay altas pendientes.</td></tr>
-            )}
-            {altasPendientes.map((alta) => (
-              <tr key={alta.id}>
-                <td>{alta.id}</td>
-                <td>{alta.paciente_nombre}</td>
-                <td>{alta.recien_nacido_numero || '—'}</td>
-                <td>
+          {cargando && (
+            <div className="tableRows" style={{ justifyContent: 'center', padding: '32px' }}>
+              Cargando...
+            </div>
+          )}
+
+          {!cargando && altasPendientes.length === 0 && (
+            <div className="tableRows" style={{ justifyContent: 'center', padding: '32px', color: 'var(--color-slategray)' }}>
+              No hay altas pendientes.
+            </div>
+          )}
+
+          {altasPendientes.map((alta, index) => {
+            const isEven = index % 2 === 0;
+            const rowClass = isEven ? "tableRows" : "tableRows2";
+
+            return (
+              <section key={alta.id} className={rowClass}>
+                <div className="franciscaMuozSoto">{alta.paciente_nombre}</div>
+                <div className="bo2026904">BO-2026-{alta.id.toString().padStart(3, '0')}</div>
+                
+                {/* ESTADO ALTA CLÍNICA */}
+                <div className="clinicalStatusCell">
                   {alta.alta_clinica_confirmada ? (
-                    <span className="badge bg-success">Confirmada</span>
+                    <div className="clinicalStatusWrapper">
+                      <div className="confirmada">Confirmada</div>
+                    </div>
                   ) : (
-                    <button className="btn btn-sm btn-primary" onClick={() => confirmarAltaClinica(alta.id)}>
-                      Confirmar Médico
-                    </button>
+                    <div className="frame12">
+                      <div className="pendiente">Pendiente</div>
+                    </div>
                   )}
-                </td>
-                <td>
+                </div>
+
+                {/* ESTADO ALTA ADMIN */}
+                <div className="clinicalStatusCell">
                   {alta.alta_administrativa_confirmada ? (
-                    <span className="badge bg-success">Confirmada</span>
+                    <div className="clinicalStatusWrapper">
+                      <div className="confirmada">Confirmada</div>
+                    </div>
                   ) : (
-                    <button className="btn btn-sm btn-secondary" onClick={() => confirmarAltaAdmin(alta.id)}>
-                      Confirmar Admin
+                    <div className="frame12">
+                      <div className="pendiente">Pendiente</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* BOTONES DE ACCIÓN */}
+                <div className="actionButtonsGroup">
+                  
+                  {/* Botón Médico */}
+                  {alta.alta_clinica_confirmada ? (
+                    <div className="clinicalActionButton">
+                      <div className="clnica">Clínica ✓</div>
+                    </div>
+                  ) : (
+                    <button className="frame14" onClick={() => confirmarAltaClinica(alta.id)}>
+                      <div className="validarPago">Firma Médica</div>
                     </button>
                   )}
-                </td>
-                <td>
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => generarPDF(alta.id)}
-                    disabled={!alta.alta_clinica_confirmada || !alta.alta_administrativa_confirmada}
-                  >
-                    📄 Generar PDF
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+                  {/* Botón Admin */}
+                  {alta.alta_administrativa_confirmada ? (
+                    <div className="clinicalActionButton">
+                      <div className="clnica">Admin ✓</div>
+                    </div>
+                  ) : (
+                    <button className="frame14" onClick={() => confirmarAltaAdmin(alta.id)}>
+                      <div className="validarPago">Validar Pago</div>
+                    </button>
+                  )}
+
+                  {/* Botón Emitir PDF */}
+                  {alta.alta_clinica_confirmada && alta.alta_administrativa_confirmada ? (
+                    <button className="issueDischargeButton" onClick={() => generarPDF(alta.id)}>
+                      <div className="emitirAlta">Emitir Alta</div>
+                    </button>
+                  ) : (
+                    <div className="frame22">
+                      <div className="emitirAlta2">Emitir Alta</div>
+                    </div>
+                  )}
+
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
     </MainLayout>
   )
