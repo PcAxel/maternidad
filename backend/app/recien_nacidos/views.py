@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
+from django.conf import settings
 import qrcode
 from io import BytesIO
 import base64
@@ -22,8 +23,8 @@ class RecienNacidoViewSet(viewsets.ModelViewSet):
             paciente_madre=parto.paciente,
         )
         
-        # Generar código QR
-        qr_data = f"RN:{instance.numero_interno}|Madre:{instance.paciente_madre.rut}"
+        # Generar código QR con un link directo a la ficha médica del RN
+        qr_data = f"{settings.FRONTEND_URL}/ficha-rn/{instance.id}"
         qr = qrcode.make(qr_data)
         buffer = BytesIO()
         qr.save(buffer, format='PNG')

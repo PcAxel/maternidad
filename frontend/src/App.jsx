@@ -8,6 +8,7 @@ import Partos from './pages/Partos'
 import RecienNacidos from './pages/RecienNacidos'
 import Altas from './pages/Altas'
 import Reportes from './pages/Reportes'
+import FichaRN from './pages/FichaRN'
 
 // Importamos el guardián y la nueva pantalla de administrador
 import ProtectedRoute from './components/ProtectedRoute'
@@ -26,6 +27,7 @@ function App() {
       <Route path="/recien-nacidos" element={<RecienNacidos />} />
       <Route path="/altas" element={<Altas />} />
       <Route path="/reportes" element={<Reportes />} />
+      <Route path="/ficha-rn/:id" element={<FichaRN />} />
 
       {/* RUTA PROTEGIDA: Solo accesible para el Administrador del Sistema */}
       <Route 
