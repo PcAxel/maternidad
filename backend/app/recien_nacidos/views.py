@@ -9,10 +9,33 @@ import base64
 import uuid
 from .models import RecienNacido, ControlPosteriorRN
 from .serializers import RecienNacidoSerializer, ControlPosteriorRNSerializer
+from app.usuarios.permissions import IsJefatura
 
 class RecienNacidoViewSet(viewsets.ModelViewSet):
     queryset = RecienNacido.objects.all()
     serializer_class = RecienNacidoSerializer
+
+    def get_permissions(self):
+        if self.action == 'regenerar_qr':
+            return [IsJefatura()]
+        return super().get_permissions()
+
+    @action(detail=False, methods=['post'])
+    def regenerar_qr(self, request):
+        actualizados = []
+        for rn in RecienNacido.objects.all():
+            qr_data = f"{settings.FRONTEND_URL}/ficha-rn/{rn.id}"
+            qr = qrcode.make(qr_data)
+            buffer = BytesIO()
+            qr.save(buffer, format='PNG')
+            rn.codigo_qr = base64.b64encode(buffer.getvalue()).decode()
+            rn.save()
+            actualizados.append(rn.numero_interno)
+        return Response({
+            'mensaje': f'{len(actualizados)} código(s) QR regenerados con FRONTEND_URL actual',
+            'registros': actualizados,
+        })
+
     
     def perform_create(self, serializer):
         # Generar número interno único
