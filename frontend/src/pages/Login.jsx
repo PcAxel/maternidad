@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import api from '../services/api'
 import './Login.css'
 
 function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const destino = location.state?.redirectTo || '/dashboard'
 
   const [rut, setRut] = useState('')
   const [password, setPassword] = useState('')
@@ -33,7 +35,7 @@ function Login() {
       localStorage.setItem('user_role', respuesta.data.rol)
       localStorage.setItem('user_nombre', respuesta.data.nombre)
 
-      navigate('/dashboard')
+      navigate(destino)
     } catch (err) {
       console.error('Error de autenticación:', err)
       setError('Credenciales incorrectas. Verifica tu RUT y contraseña.')
