@@ -11,7 +11,6 @@ function Dashboard() {
     altasPendientes: 0
   })
   
-  // Nuevo estado para la actividad reciente real obtenida de la base de datos
   const [actividadReciente, setActividadReciente] = useState([])
   const [cargando, setCargando] = useState(true)
 
@@ -26,31 +25,40 @@ function Dashboard() {
       } catch (e) { console.error('Fallo pacientes', e); }
 
       try {
-        const resPartos = await api.get('/partos/');
-        par = resPartos.data.count ?? resPartos.data.length ?? 0;
-        
-        // Tomamos los últimos partos registrados para armar la tabla real
-        const listaPartos = resPartos.data.results || resPartos.data;
-        if (Array.isArray(listaPartos)) {
-          ultimosPartos = listaPartos.slice(0, 5).map(p => ({
-            id: p.id,
-            fecha: new Date(p.fecha_inicio).toLocaleDateString() + ' ' + new Date(p.fecha_inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            tipo: `Parto (${p.tipo})`,
-            paciente: p.paciente_nombre || `Paciente ID: ${p.paciente}`,
-            estado: p.estado === 'FINALIZADO' ? 'Completado' : 'En Proceso'
-          }));
-        }
-      } catch (e) { console.error('Fallo partos', e); }
-
-      try {
         const resRN = await api.get('/recien-nacidos/');
         rn = resRN.data.count ?? resRN.data.length ?? 0;
       } catch (e) { console.error('Fallo recién nacidos', e); }
 
+      // Hacemos el fetch de Altas y Partos juntos para cruzar la información
       try {
         const resAltas = await api.get('/altas/');
-        alt = resAltas.data.count ?? resAltas.data.length ?? 0;
-      } catch (e) { console.error('Fallo altas', e); }
+        const listaAltas = resAltas.data.results || resAltas.data || [];
+
+        // CORRECCIÓN 1: Contamos solo las altas que NO tienen el certificado generado (Pendientes reales)
+        alt = listaAltas.filter(a => !a.certificado_generado).length;
+
+        const resPartos = await api.get('/partos/');
+        const listaPartos = resPartos.data.results || resPartos.data || [];
+        par = resPartos.data.count ?? listaPartos.length ?? 0;
+        
+        if (Array.isArray(listaPartos)) {
+          ultimosPartos = listaPartos.slice(0, 5).map(p => {
+            // CORRECCIÓN 2: Buscamos si esta paciente ya terminó su flujo de alta (certificado = true)
+            const altaFinalizada = listaAltas.find(a => a.paciente === p.paciente && a.certificado_generado);
+            
+            // Si el backend dice FINALIZADO o si ya encontramos su alta completada, cambia a verde
+            const estadoReal = (p.estado === 'FINALIZADO' || altaFinalizada) ? 'Completado' : 'En Proceso';
+
+            return {
+              id: p.id,
+              fecha: new Date(p.fecha_inicio).toLocaleDateString() + ' ' + new Date(p.fecha_inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              tipo: `Parto (${p.tipo})`,
+              paciente: p.paciente_nombre || `Paciente ID: ${p.paciente}`,
+              estado: estadoReal
+            };
+          });
+        }
+      } catch (e) { console.error('Fallo cruce de partos y altas', e); }
 
       setStats({
         pacientes: pac,
@@ -59,7 +67,6 @@ function Dashboard() {
         altasPendientes: alt,
       });
 
-      // Si hay datos reales de partos los usamos, de lo contrario dejamos un arreglo vacío
       setActividadReciente(ultimosPartos);
       setCargando(false);
     }
@@ -81,7 +88,7 @@ function Dashboard() {
 
       {cargando && <p style={{ color: 'var(--text-muted)' }}>Sincronizando con el servidor…</p>}
 
-      {/* Tarjetas de Métricas (Grid de 4 columnas conectadas a la BD) */}
+      {/* Tarjetas de Métricas */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '24px' }}>
         
         <div className="card-clinica" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', padding: '20px', borderRadius: '8px' }}>
@@ -139,6 +146,7 @@ function Dashboard() {
                     <td style={{ fontSize: '13px', color: 'var(--color-primary)', fontWeight: '500' }}>{item.tipo}</td>
                     <td style={{ fontSize: '13px' }}>{item.paciente}</td>
                     <td className="text-end">
+                      {/* BUBBLE CONDICIONAL PARA ESTADOS */}
                       <span className={`badge ${item.estado === 'Completado' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`} style={{ fontSize: '11px', padding: '4px 8px' }}>
                         {item.estado}
                       </span>
