@@ -8,7 +8,7 @@ class RecienNacido(models.Model):
     paciente_madre = models.ForeignKey('pacientes.Paciente', on_delete=models.CASCADE)
     
     # Identificador único
-    codigo_qr = models.CharField(max_length=100, unique=True, blank=True)
+    codigo_qr = models.TextField(blank=True)
     numero_interno = models.CharField(max_length=20, unique=True, blank=True)
     
     # Datos clínicos
