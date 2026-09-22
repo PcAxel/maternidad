@@ -138,3 +138,34 @@
     justify-content: flex-start;
   }
 }
+/* --- CORRECCIÓN SEGURA PARA TELÉFONOS MÓVILES --- */
+@media (max-width: 768px) {
+  /* Apila la barra de navegación verticalmente */
+  .navbar-container {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  
+  /* Centra el logo y los enlaces */
+  .navbar-container > div:first-child {
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+  
+  /* Permite que los enlaces fluyan en múltiples líneas pero ordenados */
+  .navbar-links {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 10px !important;
+  }
+  
+  /* Centra la sección del usuario y el botón de salir */
+  .navbar-user {
+    width: 100% !important;
+    justify-content: center !important;
+    margin-top: 8px !important;
+    padding-top: 16px !important;
+    border-top: 1px solid #f1f5f9 !important;
+  }
+}
