@@ -5,6 +5,7 @@ import './Partos.css'
 
 function Partos() {
   const [pacientes, setPacientes] = useState([]) // Lista de pacientes para el selector
+  const [listaPartos, setListaPartos] = useState([]) // Lista de partos registrados
   const [pacienteId, setPacienteId] = useState('') 
   const [tipoParto, setTipoParto] = useState('')
   const [fechaInicio, setFechaInicio] = useState('')
@@ -14,21 +15,43 @@ function Partos() {
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' })
   const [loading, setLoading] = useState(false)
 
-  // Cargar la lista de pacientes reales al abrir la página
+  // Cargar la lista de pacientes y partos al abrir la página
   useEffect(() => {
-    const cargarPacientes = async () => {
+    const cargarDatos = async () => {
       try {
-        const respuesta = await api.get('/pacientes/')
-        // Dependiendo de si tu API devuelve un paginado (results) o un array directo
-        const lista = respuesta.data.results || respuesta.data
-        setPacientes(lista)
+        const resPacientes = await api.get('/pacientes/')
+        setPacientes(resPacientes.data.results || resPacientes.data)
+        
+        // Cargamos la lista de partos para llenar la tabla
+        const resPartos = await api.get('/partos/')
+        setListaPartos(resPartos.data.results || resPartos.data)
       } catch (error) {
-        console.error("Error al cargar pacientes", error)
-        setMensaje({ texto: 'No se pudo cargar la lista de pacientes.', tipo: 'alert-warning' })
+        console.error("Error al cargar datos", error)
+        setMensaje({ texto: 'No se pudieron cargar los datos iniciales.', tipo: 'alert-warning' })
       }
     }
-    cargarPacientes()
+    cargarDatos()
   }, [])
+
+  // Función para finalizar un parto en curso
+  const finalizarParto = async (idParto) => {
+    try {
+      const fechaActual = new Date().toISOString()
+      
+      await api.patch(`/partos/${idParto}/`, {
+        fecha_termino: fechaActual
+      })
+      
+      setMensaje({ texto: 'Parto finalizado correctamente.', tipo: 'alert-success' })
+      
+      // Recargamos la lista para actualizar el estado en la tabla
+      const resPartos = await api.get('/partos/')
+      setListaPartos(resPartos.data.results || resPartos.data)
+    } catch (error) {
+      console.error("Error al finalizar parto:", error)
+      setMensaje({ texto: 'Error al finalizar el parto.', tipo: 'alert-danger' })
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -61,6 +84,10 @@ function Partos() {
         setMensaje({ texto: 'Parto registrado exitosamente.', tipo: 'alert-success' })
         setPacienteId(''); setTipoParto(''); setFechaInicio(''); 
         setFechaTermino(''); setTieneComplicaciones(false); setDetalleComplicaciones('');
+        
+        // Actualizamos la tabla automáticamente al registrar un nuevo parto
+        const resPartos = await api.get('/partos/')
+        setListaPartos(resPartos.data.results || resPartos.data)
       }
     } catch (error) {
       console.error("Error al registrar parto:", error.response?.data)
@@ -85,7 +112,6 @@ function Partos() {
       <div className="card shadow-sm p-4 mt-4">
         <form onSubmit={handleSubmit}>
           <div className="row">
-            {/* Selector de Pacientes (Adiós al error de ID inexistente) */}
             <div className="col-md-6 mb-3">
               <label className="form-label fw-bold">Seleccionar Paciente (Madre)</label>
               <select 
@@ -176,6 +202,57 @@ function Partos() {
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="card shadow-sm p-4 mt-4">
+        <h3 className="mb-4" style={{ fontSize: '18px', fontWeight: '600' }}>Partos Registrados</h3>
+        <div className="table-responsive">
+          <table className="table table-hover align-middle mb-0">
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--border-light)', color: 'var(--text-muted)' }}>
+                <th>Paciente</th>
+                <th>Tipo</th>
+                <th>Inicio</th>
+                <th>Término</th>
+                <th>Estado</th>
+                <th className="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {listaPartos.length === 0 && (
+                <tr><td colSpan="6" className="text-center py-4">No hay partos registrados.</td></tr>
+              )}
+              {listaPartos.map((parto) => {
+                const enProceso = !parto.fecha_termino;
+                return (
+                  <tr key={parto.id}>
+                    <td>{parto.paciente_nombre || `ID: ${parto.paciente}`}</td>
+                    <td>{parto.tipo}</td>
+                    <td>{new Date(parto.fecha_inicio).toLocaleString()}</td>
+                    <td>{parto.fecha_termino ? new Date(parto.fecha_termino).toLocaleString() : '-'}</td>
+                    <td>
+                      {enProceso ? (
+                        <span className="badge bg-warning text-dark">En Proceso</span>
+                      ) : (
+                        <span className="badge bg-success">Finalizado</span>
+                      )}
+                    </td>
+                    <td className="text-end">
+                      {enProceso && (
+                        <button 
+                          className="btn btn-sm btn-outline-success"
+                          onClick={() => finalizarParto(parto.id)}
+                        >
+                          Finalizar Parto
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </MainLayout>
   )

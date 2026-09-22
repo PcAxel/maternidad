@@ -11,8 +11,12 @@ function Altas() {
   const cargarAltas = async () => {
     setCargando(true)
     try {
-      const respuesta = await api.get('/altas/pendientes/')
-      setAltasPendientes(respuesta.data)
+      const respuesta = await api.get('/altas/')
+      const lista = respuesta.data.results || respuesta.data
+      
+      const pendientes = lista.filter(alta => !alta.certificado_generado)
+      
+      setAltasPendientes(pendientes)
       setMensaje('')
     } catch (error) {
       setMensaje('Error al cargar la lista de altas.')
@@ -55,8 +59,56 @@ function Altas() {
       document.body.appendChild(link)
       link.click()
       link.remove()
+      
+      cargarAltas()
     } catch (error) {
       setMensaje(error.response?.data?.error || 'No se pudo generar el certificado.')
+    }
+  }
+
+  // NUEVA FUNCIÓN: Descarga el historial en formato CSV (Excel)
+  const exportarAExcel = async () => {
+    try {
+      setMensaje('Generando archivo Excel...')
+      const respuesta = await api.get('/altas/')
+      const listaCompleta = respuesta.data.results || respuesta.data
+
+      if (listaCompleta.length === 0) {
+        setMensaje('No hay registros para exportar.')
+        return
+      }
+
+      // Cabeceras del Excel
+      const cabeceras = ['ID Alta', 'Boletín', 'Paciente', 'Tipo Alta', 'Firma Médica', 'Firma Admin', 'Certificado']
+      
+      // Filas de datos
+      const filas = listaCompleta.map(alta => {
+        return [
+          alta.id,
+          `BO-2026-${alta.id.toString().padStart(3, '0')}`,
+          alta.paciente_nombre || `ID: ${alta.paciente}`,
+          alta.tipo_alta || 'NORMAL',
+          alta.alta_clinica_confirmada ? 'Sí' : 'No',
+          alta.alta_administrativa_confirmada ? 'Sí' : 'No',
+          alta.certificado_generado ? 'Sí' : 'No'
+        ].join(';') // Usamos punto y coma para que Excel en español lo separe bien
+      })
+
+      // Generar el archivo con formato UTF-8 para que las tildes y ñ se vean bien
+      const csvContent = "data:text/csv;charset=utf-8,\ufeff" + [cabeceras.join(';'), ...filas].join('\n')
+      const encodedUri = encodeURI(csvContent)
+      
+      // Forzar la descarga
+      const link = document.createElement("a")
+      link.setAttribute("href", encodedUri)
+      link.setAttribute("download", "Historial_Altas_Maternidad.csv")
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      
+      setMensaje('') // Limpiamos el mensaje
+    } catch (error) {
+      setMensaje('Error al exportar el historial.')
     }
   }
 
@@ -72,21 +124,25 @@ function Altas() {
             </div>
           </div>
           <div className="headerActions">
-            <div className="exportButton">
-              {/* Puedes cambiar la ruta del src o usar un icono de librería si no tienes el SVG */}
+            {/* BOTÓN ACTUALIZADO PARA EXPORTAR */}
+            <button 
+              onClick={exportarAExcel}
+              className="exportButton" 
+              style={{ background: 'white', border: '1px solid var(--border-light)', padding: '8px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+            >
               <span style={{ fontSize: '16px' }}>📥</span>
-              <div className="altasText">Exportar Historial a Excel</div>
-            </div>
+              <div className="altasText fw-bold text-dark">Exportar historial a Excel</div>
+            </button>
           </div>
         </section>
 
         {mensaje && (
-          <div className="alert alert-warning mt-3" style={{ borderRadius: '8px' }}>
+          <div className="alert alert-info mt-3" style={{ borderRadius: '8px' }}>
             {mensaje}
           </div>
         )}
 
-        <div className="infoBanner">
+        <div className="infoBanner mt-3">
           <span style={{ fontSize: '20px' }}>ℹ️</span>
           <div className="informacinParaEmitir">
             Información: Para emitir el alta formal definitiva, tanto el Alta Clínica (Médico) como el Alta Administrativa (Finanzas/Admisión) deben estar confirmadas.
@@ -120,7 +176,7 @@ function Altas() {
 
             return (
               <section key={alta.id} className={rowClass}>
-                <div className="franciscaMuozSoto">{alta.paciente_nombre}</div>
+                <div className="franciscaMuozSoto">{alta.paciente_nombre || `Paciente ID: ${alta.paciente}`}</div>
                 <div className="bo2026904">BO-2026-{alta.id.toString().padStart(3, '0')}</div>
                 
                 {/* ESTADO ALTA CLÍNICA */}

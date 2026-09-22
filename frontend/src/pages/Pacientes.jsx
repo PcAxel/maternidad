@@ -31,6 +31,10 @@ function Pacientes() {
   const [grupoSanguineo, setGrupoSanguineo] = useState('')
   const [observaciones, setObservaciones] = useState('')
 
+  // ESTADOS DEL MODAL DE ALTA ACTUALIZADOS
+  const [pacienteAlta, setPacienteAlta] = useState(null)
+  const [tipoAlta, setTipoAlta] = useState('MADRE')
+
   const cargarPacientes = async (filtro = '') => {
     setCargando(true)
     try {
@@ -136,6 +140,34 @@ function Pacientes() {
     }
   }
 
+  // --- FUNCIONES DEL MODAL DE ALTA ACTUALIZADAS ---
+  const abrirModalAlta = (paciente) => {
+    setPacienteAlta(paciente)
+    setTipoAlta('MADRE') // Sincronizado con la base de datos
+  }
+
+  const confirmarAlta = async (e) => {
+    e.preventDefault()
+    try {
+      await api.post('/altas/', { 
+        paciente: pacienteAlta.id,
+        tipo_alta: tipoAlta 
+      })
+      
+      const textoAmigable = tipoAlta === 'MADRE' ? 'Solo Madre' : (tipoAlta === 'RN' ? 'Solo Recién Nacido' : 'Madre y Recién Nacido')
+      
+      setMensaje({ texto: `Alta (${textoAmigable}) iniciada correctamente. Revisa el módulo de "Altas".`, tipo: 'alert-success' })
+      setPacienteAlta(null) 
+    } catch (error) {
+      const errorReal = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+      setMensaje({ 
+        texto: 'Error al iniciar el alta: ' + errorReal, 
+        tipo: 'alert-danger' 
+      })
+      setPacienteAlta(null)
+    }
+  }
+
   return (
     <MainLayout>
       <div className="page-header flex justify-between items-center mb-4">
@@ -152,7 +184,6 @@ function Pacientes() {
         <div className={`alert ${mensaje.tipo} mb-4`}>{mensaje.texto}</div>
       )}
 
-      {/* Buscador envuelto en tarjeta clínica */}
       <div className="card-clinica mb-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', padding: '20px', borderRadius: '8px' }}>
         <form onSubmit={handleBuscar} className="d-flex gap-2">
           <input
@@ -209,7 +240,6 @@ function Pacientes() {
         </div>
       )}
 
-      {/* Tabla limpia dentro de tarjeta blanca */}
       <div className="card-clinica" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', padding: '24px', borderRadius: '8px' }}>
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
@@ -234,9 +264,14 @@ function Pacientes() {
                   <td>{p.edad}</td>
                   <td>{p.telefono}</td>
                   <td className="text-end">
-                    <button className="btn btn-sm btn-outline-primary" onClick={() => abrirAntecedentes(p)}>
-                      {p.antecedentes ? 'Ver / editar' : 'Agregar'}
-                    </button>
+                    <div className="d-flex gap-2 justify-content-end">
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => abrirAntecedentes(p)}>
+                        {p.antecedentes ? 'Ver / editar' : 'Agregar'}
+                      </button>
+                      <button className="btn btn-sm btn-outline-success fw-bold" onClick={() => abrirModalAlta(p)}>
+                        Iniciar Alta
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -314,6 +349,40 @@ function Pacientes() {
           </div>
         </div>
       )}
+
+      {/* MODAL DE ALTA ACTUALIZADO CON TUS OPCIONES DE DJANGO */}
+      {pacienteAlta && (
+        <div className="pacientes-modal" style={{ position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div className="pacientes-modal__card card-clinica" style={{ background: 'var(--bg-surface)', padding: '32px', borderRadius: '12px', width: '100%', maxWidth: '400px' }}>
+            <h3 className="mb-4" style={{ fontSize: '18px', fontWeight: '600' }}>
+              Iniciar Alta — {pacienteAlta.nombre} {pacienteAlta.apellido}
+            </h3>
+            <form onSubmit={confirmarAlta}>
+              <div className="mb-4">
+                <label className="form-label fw-bold">Seleccione el Destinatario del Alta</label>
+                <select 
+                  className="form-select" 
+                  value={tipoAlta} 
+                  onChange={(e) => setTipoAlta(e.target.value)}
+                >
+                  <option value="MADRE">Solo Madre</option>
+                  <option value="RN">Solo Recién Nacido</option>
+                  <option value="AMBOS">Madre y Recién Nacido</option>
+                </select>
+              </div>
+              <div className="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setPacienteAlta(null)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-success fw-bold">
+                  Confirmar Alta
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </MainLayout>
   )
 }
