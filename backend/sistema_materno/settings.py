@@ -25,8 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Apps externas
-    'rest_framework',
     'corsheaders',
+    'rest_framework',
     'rest_framework_simplejwt',
     # Apps del proyecto
     'app.pacientes',
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -137,3 +138,17 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=8),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
+# --- CONFIGURACIÓN DE CORS SEGURA ---
+# Si DEBUG es True (estamos desarrollando en local), permitimos todo.
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    # Si DEBUG es False (estamos en producción real), cerramos la puerta.
+    CORS_ALLOW_ALL_ORIGINS = False
+    
+    # Aquí pones las URL exactas donde vivirá tu frontend de React en el futuro
+    CORS_ALLOWED_ORIGINS = [
+        "https://clinica-materno-infantil.cl",
+        "https://www.clinica-materno-infantil.cl",
+        "https://tu-proyecto.vercel.app",
+    ]

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import PerfilUsuario
 
 class PerfilUsuarioSerializer(serializers.ModelSerializer):
@@ -60,13 +61,18 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
         return instance
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         usuario = self.user
+        
         data['username'] = usuario.username
         data['nombre'] = usuario.get_full_name() or usuario.username
-        data['rol'] = usuario.perfil.rol if hasattr(usuario, 'perfil') else None
+        
+        # Fallback de seguridad en caso de que un superusuario no tenga perfil creado
+        try:
+            data['rol'] = usuario.perfil.rol
+        except Exception:
+            data['rol'] = 'ADMIN_SISTEMA'
+            
         return data

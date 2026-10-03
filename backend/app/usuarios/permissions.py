@@ -1,11 +1,17 @@
 from rest_framework import permissions
 
-
 def _tiene_rol(request, roles_permitidos):
     if not request.user.is_authenticated:
         return False
+        
+    # --- ESCUDO DE SEGURIDAD ---
+    # Si entraste con el superusuario nativo de Django, te da acceso total
+    if request.user.is_superuser:
+        return True
+        
     if not hasattr(request.user, 'perfil'):
         return False
+        
     return request.user.perfil.rol in roles_permitidos
 
 
@@ -34,8 +40,7 @@ class CanViewReports(permissions.BasePermission):
         return _tiene_rol(request, ['JEFATURA', 'GERENCIA', 'ADMIN_SISTEMA'])
 
 
-# NUEVA CLASE PARA EL PANEL DE CONTROL
 class IsAdminSistema(permissions.BasePermission):
     def has_permission(self, request, view):
-        # Solo y exclusivamente el ADMIN_SISTEMA puede pasar por aquí
+        # Solo y exclusivamente el ADMIN_SISTEMA (o el superuser) puede pasar por aquí
         return _tiene_rol(request, ['ADMIN_SISTEMA'])

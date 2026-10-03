@@ -27,6 +27,59 @@ class RecienNacido(models.Model):
     ]
     condicion_al_nacer = models.CharField(max_length=20, choices=CONDICION)
     
+# --- NUEVOS CAMPOS CLÍNICOS: FICHA RECIÉN NACIDO (MINSAL) ---
+    SEXO_CHOICES = [
+        ('FEMENINO', 'Femenino'),
+        ('MASCULINO', 'Masculino'),
+        ('INDETERMINADO', 'Indeterminado'),
+    ]
+    GRUPO_RH_CHOICES = [
+        ('PENDIENTE', 'Pendiente'),
+        ('O+', 'O Rh(+)'),
+        ('O-', 'O Rh(-)'),
+        ('A+', 'A Rh(+)'),
+        ('A-', 'A Rh(-)'),
+        ('B+', 'B Rh(+)'),
+        ('B-', 'B Rh(-)'),
+        ('AB+', 'AB Rh(+)'),
+        ('AB-', 'AB Rh(-)'),
+    ]
+
+    sexo = models.CharField(
+        max_length=15,
+        choices=SEXO_CHOICES,
+        default='FEMENINO',
+        null=True,
+        blank=True
+    )
+    circunferencia_craneana = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        default=34.5,
+        null=True,
+        blank=True,
+        help_text="Perímetro cefálico (CC) en cm"
+    )
+    grupo_rh = models.CharField(
+        max_length=15,
+        choices=GRUPO_RH_CHOICES,
+        default='PENDIENTE',
+        null=True,
+        blank=True
+    )
+    profilaxis_completa = models.BooleanField(
+        default=True,
+        help_text="¿Recibió profilaxis ocular, cordón y Vitamina K?"
+    )
+    lactancia_primera_hora = models.BooleanField(
+        default=True,
+        help_text="¿Inició lactancia materna en la primera hora de vida?"
+    )
+    requirio_oxigeno = models.BooleanField(
+        default=False,
+        help_text="¿Requirió oxígeno o estímulo de reanimación al nacer?"
+    )
+    
     # Derivaciones
     derivado = models.BooleanField(default=False)
     servicio_derivacion = models.CharField(max_length=100, blank=True)

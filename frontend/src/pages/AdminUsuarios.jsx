@@ -20,6 +20,14 @@ function AdminUsuarios() {
     especialidad: ''
   })
 
+  // Estado para validación visual interactiva
+  const [camposVacios, setCamposVacios] = useState({
+    username: false,
+    password: false,
+    first_name: false,
+    last_name: false
+  })
+
   // Cargar la lista de usuarios de forma segura
   useEffect(() => {
     let isMounted = true;
@@ -30,7 +38,6 @@ function AdminUsuarios() {
         const response = await api.get('/usuarios/') 
         
         if (isMounted) {
-          // Solución clave: Validamos si viene paginado o directo como arreglo
           const dataUsuarios = Array.isArray(response.data) 
             ? response.data 
             : (response.data.results || [])
@@ -57,8 +64,14 @@ function AdminUsuarios() {
     }
   }, [])
 
+  // Manejador inteligente: actualiza el valor y quita el borde rojo al mismo tiempo
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    if (camposVacios[name]) {
+      setCamposVacios({ ...camposVacios, [name]: false });
+    }
   }
 
   // Función para crear un nuevo usuario
@@ -66,6 +79,24 @@ function AdminUsuarios() {
     e.preventDefault()
     setMensajeExito('')
     setError('')
+
+    // VALIDACIÓN ESPECÍFICA DE CAMPOS VACÍOS
+    const faltaUsername = !form.username.trim();
+    const faltaPassword = !form.password.trim();
+    const faltaFirstName = !form.first_name.trim();
+    const faltaLastName = !form.last_name.trim();
+
+    setCamposVacios({
+      username: faltaUsername,
+      password: faltaPassword,
+      first_name: faltaFirstName,
+      last_name: faltaLastName
+    });
+
+    if (faltaUsername || faltaPassword || faltaFirstName || faltaLastName) {
+      setError('Por favor, completa todos los campos obligatorios marcados en rojo.');
+      return;
+    }
 
     try {
       await api.post('/usuarios/', form)
@@ -79,6 +110,7 @@ function AdminUsuarios() {
         rol: 'MATRONA',
         especialidad: ''
       })
+      setCamposVacios({ username: false, password: false, first_name: false, last_name: false })
       
       // Recargamos la tabla de forma segura
       const response = await api.get('/usuarios/')
@@ -116,7 +148,7 @@ function AdminUsuarios() {
 
       <div className="card shadow-sm p-4 mb-5 border-0 bg-white" style={{ borderRadius: '12px' }}>
         <h5 className="fw-bold mb-3" style={{ color: '#0f172a' }}>Registrar Nuevo Perfil</h5>
-        <form onSubmit={handleSubmit} className="row g-3">
+        <form onSubmit={handleSubmit} className="row g-3" noValidate>
           <div className="col-md-4">
             <label className="form-label fw-semibold">Rol en el Sistema</label>
             <select className="form-select" name="rol" value={form.rol} onChange={handleChange}>
@@ -131,33 +163,87 @@ function AdminUsuarios() {
           </div>
 
           <div className="col-md-4">
-            <label className="form-label fw-semibold">Nombre de Usuario (Login)</label>
-            <input type="text" className="form-control" name="username" value={form.username} onChange={handleChange} required placeholder="Ej. asilva" />
+            <label className="form-label fw-semibold">
+              Nombre de Usuario (Login)
+              {camposVacios.username && <span className="text-danger ms-2" style={{ fontSize: '0.85em' }}>* Obligatorio</span>}
+            </label>
+            <input 
+              type="text" 
+              className={`form-control ${camposVacios.username ? 'is-invalid' : ''}`} 
+              name="username" 
+              value={form.username} 
+              onChange={handleChange} 
+              placeholder="Ej. asilva" 
+            />
           </div>
 
           <div className="col-md-4">
-            <label className="form-label fw-semibold">Contraseña Temporal</label>
-            <input type="password" className="form-control" name="password" value={form.password} onChange={handleChange} required placeholder="••••••••" />
+            <label className="form-label fw-semibold">
+              Contraseña Temporal
+              {camposVacios.password && <span className="text-danger ms-2" style={{ fontSize: '0.85em' }}>* Obligatorio</span>}
+            </label>
+            <input 
+              type="password" 
+              className={`form-control ${camposVacios.password ? 'is-invalid' : ''}`} 
+              name="password" 
+              value={form.password} 
+              onChange={handleChange} 
+              placeholder="••••••••" 
+            />
           </div>
 
           <div className="col-md-4">
-            <label className="form-label fw-semibold">Nombres</label>
-            <input type="text" className="form-control" name="first_name" value={form.first_name} onChange={handleChange} placeholder="Alejandro" />
+            <label className="form-label fw-semibold">
+              Nombres
+              {camposVacios.first_name && <span className="text-danger ms-2" style={{ fontSize: '0.85em' }}>* Obligatorio</span>}
+            </label>
+            <input 
+              type="text" 
+              className={`form-control ${camposVacios.first_name ? 'is-invalid' : ''}`} 
+              name="first_name" 
+              value={form.first_name} 
+              onChange={handleChange} 
+              placeholder="Ej. Alejandro" 
+            />
           </div>
 
           <div className="col-md-4">
-            <label className="form-label fw-semibold">Apellidos</label>
-            <input type="text" className="form-control" name="last_name" value={form.last_name} onChange={handleChange} placeholder="Silva" />
+            <label className="form-label fw-semibold">
+              Apellidos
+              {camposVacios.last_name && <span className="text-danger ms-2" style={{ fontSize: '0.85em' }}>* Obligatorio</span>}
+            </label>
+            <input 
+              type="text" 
+              className={`form-control ${camposVacios.last_name ? 'is-invalid' : ''}`} 
+              name="last_name" 
+              value={form.last_name} 
+              onChange={handleChange} 
+              placeholder="Ej. Silva" 
+            />
           </div>
 
           <div className="col-md-4">
-            <label className="form-label fw-semibold">Correo Electrónico</label>
-            <input type="email" className="form-control" name="email" value={form.email} onChange={handleChange} placeholder="correo@hospital.cl" />
+            <label className="form-label fw-semibold">Correo Electrónico (Opcional)</label>
+            <input 
+              type="email" 
+              className="form-control" 
+              name="email" 
+              value={form.email} 
+              onChange={handleChange} 
+              placeholder="correo@hospital.cl" 
+            />
           </div>
 
           <div className="col-md-12">
             <label className="form-label fw-semibold">Especialidad (Opcional)</label>
-            <input type="text" className="form-control" name="especialidad" value={form.especialidad} onChange={handleChange} placeholder="Ej. Obstetricia y Ginecología" />
+            <input 
+              type="text" 
+              className="form-control" 
+              name="especialidad" 
+              value={form.especialidad} 
+              onChange={handleChange} 
+              placeholder="Ej. Obstetricia y Ginecología" 
+            />
           </div>
 
           <div className="col-12 text-end mt-4">

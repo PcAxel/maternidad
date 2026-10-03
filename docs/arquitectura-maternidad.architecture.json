@@ -5,7 +5,6 @@
     "title": "Sistema Materno Infantil",
     "output": "arquitectura-maternidad.html",
     "quality_profile": "showcase",
-    "locale": "en",
     "repository": {
       "url": "https://github.com/PcAxel/maternidad.git",
       "provider": "github",
@@ -13,37 +12,37 @@
       "revision": "c782c69d5c89105bae435eed705b8d610b5b1b2a"
     },
     "views": [
-      { "id": "request-path", "label": "Request path", "focus": ["usuarios", "frontend", "api", "domain", "mysql"], "note": "Follow authenticated clinical requests from the browser to MySQL." },
-      { "id": "identity", "label": "Identity", "focus": ["usuarios", "frontend", "jwt", "api"], "note": "See login, token refresh, and bearer-token verification." },
-      { "id": "reports", "label": "Reports", "focus": ["frontend", "api", "domain", "exports"], "note": "Trace visual reports and Excel/PDF export endpoints." }
+      { "id": "request-path", "label": "Flujo de solicitudes", "focus": ["usuarios", "frontend", "api", "domain", "mysql"], "note": "Sigue las solicitudes clínicas autenticadas desde el navegador hasta MySQL." },
+      { "id": "identity", "label": "Identidad", "focus": ["usuarios", "frontend", "jwt", "api"], "note": "Visualiza el inicio de sesión, la renovación del token y su verificación." },
+      { "id": "reports", "label": "Reportes", "focus": ["frontend", "api", "domain", "exports"], "note": "Traza los reportes visuales y los endpoints de exportación a Excel/PDF." }
     ]
   },
   "components": [
-    { "id": "usuarios", "type": "external", "label": "Personal clínico", "sublabel": "Browser users", "pos": [40, 300], "size": [150, 64], "sources": [{ "path": "frontend/src/App.jsx", "label": "routes" }] },
-    { "id": "frontend", "type": "frontend", "label": "Frontend React", "sublabel": "Vite :5173", "pos": [250, 300], "size": [160, 64], "tag": "Axios + Router", "sources": [{ "path": "frontend/src/App.jsx", "label": "app routes" }, { "path": "frontend/src/services/api.js", "label": "API client" }] },
-    { "id": "jwt", "type": "security", "label": "JWT authentication", "sublabel": "Simple JWT", "pos": [250, 120], "size": [160, 64], "tag": "8h access / 1d refresh", "sources": [{ "path": "backend/app/usuarios/urls.py", "label": "login endpoints" }, { "path": "backend/sistema_materno/settings.py", "label": "JWT config" }] },
-    { "id": "api", "type": "backend", "label": "Django REST API", "sublabel": "WSGI application", "pos": [470, 300], "size": [170, 64], "tag": "/api/*", "sources": [{ "path": "backend/sistema_materno/urls.py", "label": "API routes" }, { "path": "backend/sistema_materno/settings.py", "label": "DRF config" }] },
-    { "id": "domain", "type": "backend", "label": "Domain modules", "sublabel": "Django apps", "pos": [700, 300], "size": [180, 64], "tag": "Clinical + reporting", "sources": [{ "path": "backend/app/pacientes/urls.py", "label": "patients" }, { "path": "backend/app/reportes/urls.py", "label": "reports" }, { "path": "backend/app/usuarios/urls.py", "label": "users" }] },
-    { "id": "mysql", "type": "database", "label": "MySQL", "sublabel": "Configured relational DB", "pos": [940, 300], "size": [160, 64], "tag": "DB_PORT / DB_HOST", "sources": [{ "path": "backend/sistema_materno/settings.py", "label": "database config" }] },
-    { "id": "exports", "type": "cloud", "label": "Report exports", "sublabel": "Excel / PDF responses", "pos": [700, 470], "size": [180, 64], "tag": "HTTP downloads", "sources": [{ "path": "backend/app/reportes/urls.py", "label": "export endpoints" }] }
+    { "id": "usuarios", "type": "external", "label": "Personal clínico", "sublabel": "Usuarios del navegador", "pos": [40, 300], "size": [150, 64], "sources": [{ "path": "frontend/src/App.jsx", "label": "rutas" }] },
+    { "id": "frontend", "type": "frontend", "label": "Frontend React", "sublabel": "Vite :5173", "pos": [250, 300], "size": [160, 64], "tag": "Axios + Router", "sources": [{ "path": "frontend/src/App.jsx", "label": "rutas de la app" }, { "path": "frontend/src/services/api.js", "label": "cliente API" }] },
+    { "id": "jwt", "type": "security", "label": "Autenticación JWT", "sublabel": "Simple JWT", "pos": [250, 120], "size": [160, 64], "tag": "8 h acceso / 1 d renovación", "sources": [{ "path": "backend/app/usuarios/urls.py", "label": "endpoints de acceso" }, { "path": "backend/sistema_materno/settings.py", "label": "configuración JWT" }] },
+    { "id": "api", "type": "backend", "label": "API Django REST", "sublabel": "Aplicación WSGI", "pos": [470, 300], "size": [170, 64], "tag": "/api/*", "sources": [{ "path": "backend/sistema_materno/urls.py", "label": "rutas de la API" }, { "path": "backend/sistema_materno/settings.py", "label": "configuración DRF" }] },
+    { "id": "domain", "type": "backend", "label": "Módulos del dominio", "sublabel": "Aplicaciones Django", "pos": [700, 300], "size": [180, 64], "tag": "Clínica + reportes", "sources": [{ "path": "backend/app/pacientes/urls.py", "label": "pacientes" }, { "path": "backend/app/reportes/urls.py", "label": "reportes" }, { "path": "backend/app/usuarios/urls.py", "label": "usuarios" }] },
+    { "id": "mysql", "type": "database", "label": "MySQL", "sublabel": "Base de datos relacional", "pos": [940, 300], "size": [160, 64], "tag": "DB_PORT / DB_HOST", "sources": [{ "path": "backend/sistema_materno/settings.py", "label": "configuración de base de datos" }] },
+    { "id": "exports", "type": "cloud", "label": "Exportación de reportes", "sublabel": "Respuestas Excel / PDF", "pos": [700, 470], "size": [180, 64], "tag": "Descargas HTTP", "sources": [{ "path": "backend/app/reportes/urls.py", "label": "endpoints de exportación" }] }
   ],
   "boundaries": [
-    { "kind": "security-group", "label": "Browser boundary", "wraps": ["usuarios", "frontend"] },
-    { "kind": "region", "label": "Django application boundary", "wraps": ["jwt", "api", "domain", "exports"] }
+    { "kind": "security-group", "label": "Límite del navegador", "wraps": ["usuarios", "frontend"] },
+    { "kind": "region", "label": "Límite de la aplicación Django", "wraps": ["jwt", "api", "domain", "exports"] }
   ],
   "connections": [
     { "id": "user-browser", "from": "usuarios", "to": "frontend", "label": "HTTPS", "variant": "emphasis" },
-    { "id": "login", "from": "frontend", "to": "jwt", "label": "login / refresh", "variant": "security", "fromSide": "top", "toSide": "bottom" },
+    { "id": "login", "from": "frontend", "to": "jwt", "label": "inicio / renovación", "variant": "security", "fromSide": "top", "toSide": "bottom" },
     { "id": "bearer-api", "from": "frontend", "to": "api", "label": "Bearer JWT", "variant": "security" },
-    { "id": "verify-jwt", "from": "jwt", "to": "api", "label": "verify token", "variant": "security", "fromSide": "right", "toSide": "top" },
-    { "id": "route-domain", "from": "api", "to": "domain", "label": "REST endpoints", "labelDy": -26 },
+    { "id": "verify-jwt", "from": "jwt", "to": "api", "label": "verificar token", "variant": "security", "fromSide": "right", "toSide": "top" },
+    { "id": "route-domain", "from": "api", "to": "domain", "label": "endpoints REST", "labelDy": -26 },
     { "id": "domain-db", "from": "domain", "to": "mysql", "label": "ORM / SQL" },
     { "id": "domain-reports", "from": "domain", "to": "exports", "label": "Excel / PDF", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelDy": 24 },
-    { "id": "export-browser", "from": "exports", "to": "frontend", "label": "download", "variant": "dashed", "fromSide": "left", "toSide": "bottom" }
+    { "id": "export-browser", "from": "exports", "to": "frontend", "label": "descarga", "variant": "dashed", "fromSide": "left", "toSide": "bottom" }
   ],
   "cards": [
-    { "dot": "cyan", "title": "Experience", "items": ["React routes clinical workflows", "Axios reads VITE_API_URL", "JWT is attached from localStorage"] },
-    { "dot": "emerald", "title": "Application", "items": ["Django REST exposes /api/*", "Domain apps cover maternity records", "DRF defaults to authenticated access"] },
-    { "dot": "amber", "title": "Persistence", "items": ["MySQL connection comes from environment variables", "Reports query domain data", "Excel and PDF are HTTP downloads"] }
+    { "dot": "cyan", "title": "Experiencia", "items": ["React gestiona los flujos clínicos", "Axios lee VITE_API_URL", "JWT se adjunta desde localStorage"] },
+    { "dot": "emerald", "title": "Aplicación", "items": ["Django REST expone /api/*", "Los módulos gestionan registros materno-infantiles", "DRF requiere autenticación por defecto"] },
+    { "dot": "amber", "title": "Persistencia", "items": ["La conexión MySQL usa variables de entorno", "Los reportes consultan los módulos del dominio", "Excel y PDF se descargan mediante HTTP"] }
   ]
 }

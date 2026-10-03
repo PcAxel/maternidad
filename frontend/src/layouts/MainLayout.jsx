@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Navigate } from 'react-router-dom'
 import './MainLayout.css'
 
 const roleLabels = {
@@ -12,8 +12,16 @@ const roleLabels = {
 }
 
 function MainLayout({ children }) {
-  // Obtenemos los valores y evitamos que caigan en null o undefined
-  const rol = localStorage.getItem('user_role') || 'ADMIN_SISTEMA';
+  // Guardia de sesión: si no hay sesión iniciada, redirige al Login
+  const token = localStorage.getItem('token') || localStorage.getItem('access') || localStorage.getItem('access_token');
+  const rolGuardado = localStorage.getItem('user_role');
+
+  if (!token && !rolGuardado) {
+    return <Navigate to="/" replace />;
+  }
+  
+  // Obtenemos los valores de la sesión activa
+  const rol = rolGuardado || 'ADMIN_SISTEMA';
   const nombre = localStorage.getItem('user_nombre') || 'Administrador';
 
   // 1. Definimos los enlaces base
@@ -39,6 +47,8 @@ function MainLayout({ children }) {
 
   if (rol === 'JEFATURA' || rol === 'GERENCIA' || rol === 'ADMIN_SISTEMA') {
     links.push(
+      { to: '/partos', label: 'Partos' },
+      { to: '/recien-nacidos', label: 'Recién Nacidos' },
       { to: '/reportes', label: 'Informes' }
     );
   }
@@ -55,6 +65,17 @@ function MainLayout({ children }) {
       t.to === value.to
     ))
   );
+
+  // 3. Candado de seguridad por Rol usando la ruta del navegador (sin hooks adicionales)
+  const rutaActual = window.location.pathname;
+  const rutasPermitidas = links.map((l) => l.to);
+  const tienePermisoRuta = rutasPermitidas.some((ruta) =>
+    rutaActual.startsWith(ruta)
+  );
+
+  if (!tienePermisoRuta && rutaActual !== '/dashboard') {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleLogout = () => {
     localStorage.clear();
