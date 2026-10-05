@@ -152,3 +152,17 @@ else:
         "https://www.clinica-materno-infantil.cl",
         "https://tu-proyecto.vercel.app",
     ]
+
+    # --- CONFIGURACIÓN DE CORS SEGURA PARA PRODUCCIÓN ---
+
+# 1. Apagamos el permiso global por seguridad
+CORS_ALLOW_ALL_ORIGINS = False
+
+CORS_ALLOWED_ORIGINS = [
+    "https://maternidad.vercel.app",
+]
+
+# Agrega esta variable para permitir envíos POST desde Vercel
+CSRF_TRUSTED_ORIGINS = [
+    "https://maternidad.vercel.app",
+]
