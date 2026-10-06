@@ -4,6 +4,9 @@ import MainLayout from '../layouts/MainLayout'
 import api from '../services/api'
 
 function Dashboard() {
+  // Capturamos el rol del usuario actual
+  const rolUsuario = localStorage.getItem('rol') || ''; 
+
   const [stats, setStats] = useState({
     pacientes: 0,
     partos: 0,
@@ -29,12 +32,9 @@ function Dashboard() {
         rn = resRN.data.count ?? resRN.data.length ?? 0;
       } catch (e) { console.error('Fallo recién nacidos', e); }
 
-      // Hacemos el fetch de Altas y Partos juntos para cruzar la información
       try {
         const resAltas = await api.get('/altas/');
         const listaAltas = resAltas.data.results || resAltas.data || [];
-
-        // CORRECCIÓN 1: Contamos solo las altas que NO tienen el certificado generado (Pendientes reales)
         alt = listaAltas.filter(a => !a.certificado_generado).length;
 
         const resPartos = await api.get('/partos/');
@@ -43,10 +43,7 @@ function Dashboard() {
         
         if (Array.isArray(listaPartos)) {
           ultimosPartos = listaPartos.slice(0, 5).map(p => {
-            // CORRECCIÓN 2: Buscamos si esta paciente ya terminó su flujo de alta (certificado = true)
             const altaFinalizada = listaAltas.find(a => a.paciente === p.paciente && a.certificado_generado);
-            
-            // Si el backend dice FINALIZADO o si ya encontramos su alta completada, cambia a verde
             const estadoReal = (p.estado === 'FINALIZADO' || altaFinalizada) ? 'Completado' : 'En Proceso';
 
             return {
@@ -146,7 +143,6 @@ function Dashboard() {
                     <td style={{ fontSize: '13px', color: 'var(--color-primary)', fontWeight: '500' }}>{item.tipo}</td>
                     <td style={{ fontSize: '13px' }}>{item.paciente}</td>
                     <td className="text-end">
-                      {/* BUBBLE CONDICIONAL PARA ESTADOS */}
                       <span className={`badge ${item.estado === 'Completado' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`} style={{ fontSize: '11px', padding: '4px 8px' }}>
                         {item.estado}
                       </span>
@@ -162,18 +158,35 @@ function Dashboard() {
         <div className="card-clinica" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-light)', padding: '24px', borderRadius: '8px', height: 'fit-content' }}>
           <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>Accesos Rápidos</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <Link to="/pacientes" className="btn btn-outline-secondary text-start d-flex justify-content-between align-items-center" style={{ fontSize: '13px', padding: '10px 14px' }}>
-              Registrar Ingreso de Paciente <span>&rsaquo;</span>
-            </Link>
-            <Link to="/partos" className="btn btn-outline-secondary text-start d-flex justify-content-between align-items-center" style={{ fontSize: '13px', padding: '10px 14px' }}>
-              Iniciar Flujo de Parto <span>&rsaquo;</span>
-            </Link>
-            <Link to="/recien-nacidos" className="btn btn-outline-secondary text-start d-flex justify-content-between align-items-center" style={{ fontSize: '13px', padding: '10px 14px' }}>
-              Nueva Ficha Neonatal <span>&rsaquo;</span>
-            </Link>
-            <Link to="/reportes" className="btn btn-outline-secondary text-start d-flex justify-content-between align-items-center" style={{ fontSize: '13px', padding: '10px 14px' }}>
-              Generar Reporte Mensual <span>&rsaquo;</span>
-            </Link>
+            
+            {/* Visible para médicos, matronas y admins */}
+            {(rolUsuario === 'MEDICO' || rolUsuario === 'MATRONA' || rolUsuario === 'ADMIN_SISTEMA') && (
+              <Link to="/pacientes" className="btn btn-outline-secondary text-start d-flex justify-content-between align-items-center" style={{ fontSize: '13px', padding: '10px 14px' }}>
+                Registrar Ingreso de Paciente <span>&rsaquo;</span>
+              </Link>
+            )}
+
+            {/* Visible SOLO para personal clínico (Matronas y Médicos) */}
+            {(rolUsuario === 'MATRONA' || rolUsuario === 'MEDICO') && (
+              <Link to="/partos" className="btn btn-outline-secondary text-start d-flex justify-content-between align-items-center" style={{ fontSize: '13px', padding: '10px 14px' }}>
+                Iniciar Flujo de Parto <span>&rsaquo;</span>
+              </Link>
+            )}
+
+            {/* Visible SOLO para personal clínico */}
+            {(rolUsuario === 'MATRONA' || rolUsuario === 'MEDICO' || rolUsuario === 'PEDIATRA') && (
+              <Link to="/recien-nacidos" className="btn btn-outline-secondary text-start d-flex justify-content-between align-items-center" style={{ fontSize: '13px', padding: '10px 14px' }}>
+                Nueva Ficha Neonatal <span>&rsaquo;</span>
+              </Link>
+            )}
+
+            {/* Visible SOLO para Administradores de Sistema o Directores */}
+            {(rolUsuario === 'ADMIN_SISTEMA' || rolUsuario === 'DIRECTOR') && (
+              <Link to="/reportes" className="btn btn-outline-secondary text-start d-flex justify-content-between align-items-center" style={{ fontSize: '13px', padding: '10px 14px' }}>
+                Generar Reporte Mensual <span>&rsaquo;</span>
+              </Link>
+            )}
+
           </div>
         </div>
 
