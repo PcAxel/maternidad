@@ -38,7 +38,8 @@ function MainLayout({ children }) {
     );
   }
 
-  if (rol === 'ADMINISTRATIVO' || rol === 'JEFATURA' || rol === 'GERENCIA' || rol === 'ADMIN_SISTEMA') {
+  // Agregamos 'MEDICO' a esta validación para que también tenga el módulo de 'Altas'
+  if (rol === 'ADMINISTRATIVO' || rol === 'JEFATURA' || rol === 'GERENCIA' || rol === 'ADMIN_SISTEMA' || rol === 'MEDICO') {
     links.push(
       { to: '/pacientes', label: 'Pacientes' },
       { to: '/altas', label: 'Altas' }
