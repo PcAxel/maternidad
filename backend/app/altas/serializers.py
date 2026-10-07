@@ -9,6 +9,10 @@ class HistorialAltaSerializer(serializers.ModelSerializer):
 
 class AltaSerializer(serializers.ModelSerializer):
     historial = HistorialAltaSerializer(many=True, read_only=True)
+    
+    # Inyectamos estos campos mágicos para que React los reciba listos
+    paciente_nombre = serializers.SerializerMethodField()
+    recien_nacido_numero = serializers.SerializerMethodField()
 
     class Meta:
         model = Alta
@@ -19,6 +23,15 @@ class AltaSerializer(serializers.ModelSerializer):
             'certificado_generado', 'certificado_pdf', 'fecha_certificado',
         ]
 
+    def get_paciente_nombre(self, obj):
+        # Capturamos el RUT y el Nombre desde la tabla Paciente
+        rut_paciente = getattr(obj.paciente, 'rut', 'Sin RUT')
+        return f"{obj.paciente.nombre} {obj.paciente.apellido} (RUT: {rut_paciente})"
+
+    def get_recien_nacido_numero(self, obj):
+        if obj.recien_nacido:
+            return obj.recien_nacido.numero_interno
+        return None
 
 class AltaPendienteSerializer(serializers.ModelSerializer):
     paciente_nombre = serializers.SerializerMethodField()
@@ -32,7 +45,10 @@ class AltaPendienteSerializer(serializers.ModelSerializer):
         ]
 
     def get_paciente_nombre(self, obj):
-        return f"{obj.paciente.nombre} {obj.paciente.apellido}"
+        rut_paciente = getattr(obj.paciente, 'rut', 'Sin RUT')
+        return f"{obj.paciente.nombre} {obj.paciente.apellido} (RUT: {rut_paciente})"
 
     def get_recien_nacido_numero(self, obj):
-        return obj.recien_nacido.numero_interno if obj.recien_nacido else None
+        if obj.recien_nacido:
+            return obj.recien_nacido.numero_interno
+        return None
