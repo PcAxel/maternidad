@@ -18,7 +18,7 @@ const MODULOS = [
   {
     to: '/pacientes',
     label: 'Pacientes',
-    roles: ['ADMINISTRATIVO', 'MATRONA', 'MEDICO', 'JEFATURA', 'ADMIN_SISTEMA'],
+    roles: ['ADMINISTRATIVO', 'MATRONA', 'JEFATURA', 'ADMIN_SISTEMA'],
   },
   {
     to: '/partos',
@@ -28,7 +28,7 @@ const MODULOS = [
   {
     to: '/recien-nacidos',
     label: 'Recién Nacidos',
-    roles: ['MATRONA', 'MEDICO', 'ENFERMERO', 'JEFATURA', 'ADMIN_SISTEMA'],
+    roles: ['MATRONA',  'ENFERMERO', 'JEFATURA', 'ADMIN_SISTEMA'],
   },
   {
     to: '/altas',
